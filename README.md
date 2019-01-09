@@ -11,6 +11,14 @@ The sole purpose of this project is to maximize learning while you develop it.
 Come and join in the development!
 
 
+Learning Goals
+--------------
+
+1. How to change your code as a project's needs grow
+2. How to collaborate in an open source project
+3. From simple to advanced Python programming
+
+
 How to Participate
 ------------------
 
