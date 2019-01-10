@@ -17,6 +17,23 @@ The project was officially announced in the [Telegram
 Group](https://t.me/pyjaipur) on the 9th of January 2019. It is an ongoing
 project and so you can jump in any time!
 
+Pre-requisite
+----------------
+
+* knowledge of GitHub, not a must though you can learn basics in a couple of hours.
+* Presence on Telegram Group (install telegram first if error or join from desktop )
+* Fill this form with SOP(statement of purpose)
+* Dedication
+
+Benefits
+------------
+* Mentorship
+* Open Source Project
+* Learn By Doing
+* No COST
+* Certificates
+* Possible Internship Opportunities.Pre-requisite
+
 
 Why are we using certain libraries/techniques
 --------
