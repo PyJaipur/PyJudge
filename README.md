@@ -22,13 +22,13 @@ Why are we using certain libraries/techniques
 --------
 
 The goal of this project is to learn, we will use libraries which force
-you to learn certain concepts. In all cases we try to use minimal libraries
+you to learn certain concepts. In all cases, we try to use minimal libraries
 which don't have a lot of extra things in them instead of big ones to make the
 learning elements small and clear.
 
 We mention overall goals and intentions in
 [the Projects section of this repository](https://github.com/PyJaipur/Project-Coding-Contest/projects). Each
-issue is assigned to a project. If you are joing this project midway, you can
+issue is assigned to a project. If you are joining this project midway, you can
 refer to the projects to see what has happened in the past and the intentions
 and motivations of earlier code.
 
@@ -46,7 +46,7 @@ How to Participate
 
 Participation in this project has two paths. You can write code, and you can review other people's merge requests.
 
-Two write code:
+To write code:
 
 1. Read the [issues](https://github.com/PyJaipur/Project-Coding-Contest/issues) in this project (Issues in the [good-first-issue](https://github.com/PyJaipur/Project-Coding-Contest/labels/good%20first%20issue) label are a good starting point).
 2. If you want to work on an issue mention in the issue discussion that you want to work on it. You can collaborate with multiple people on a single issue. Make good use of github's fork and merge mechanism.
@@ -58,5 +58,5 @@ To review:
 
 1. Pick up a merge request on the project.
 2. Go through the code.
-3. If something is not clear, ask for clarification. If someone has already asked just thumbsup that comment.
-4. Add an approving comment saying "Good work!". If someone has already commented thumbsup on that.
+3. If something is not clear, ask for clarification. If someone has already asked just thumbs up that comment.
+4. Add an approving comment saying "Good work!". If someone has already commented thumbs up on that.
