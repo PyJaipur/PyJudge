@@ -4,7 +4,7 @@ Coding Contest Software
 
 We at PyJaipur are building our first product. 
 If you want to host a coding contest in your college or perhaps in your 
-office (maybe even within your family!) this is the product you will need. 
+office (maybe even within your family!) this is the product you will need
 
 A program to host a programming contest on your laptop. 
 The sole purpose of this project is to maximize learning while you develop it. 
@@ -53,9 +53,9 @@ and motivations of earlier code.
 Learning Goals
 --------------
 
-1. How to change your code as a project's needs grow
-2. How to collaborate in an open source project
-3. From simple to advanced Python programming
+1. How to change your code as a project's needs grow.
+2. How to collaborate in an open source project.
+3. From simple to advanced Python programming.
 
 
 How to Participate
