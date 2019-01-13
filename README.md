@@ -32,7 +32,7 @@ Benefits
 * Learn By Doing
 * No COST
 * Certificates
-* Possible Internship Opportunities.Pre-requisite
+* Possible Internship Opportunities.
 
 
 Why are we using certain libraries/techniques
