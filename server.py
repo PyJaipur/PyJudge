@@ -14,18 +14,20 @@ def index(something):
 
 @app.get('/question/<number>')
 def question1(number):
-    return '''<b>Add given two numbers in given text file and upload your solution in a text file.</b>\n<a href="http://localhost:8080/question/1/download/">Download Test Case</a>:
-            <a href="http://localhost:8080/question/1/submit">Submit Outputs</a>
-
-'''
-@app.route('/question/<number>/submit')
-def submit(number):
     return static_file('index.html' , root=dir_path)
+    #return '''<b>Add given two numbers in given text file and upload your solution in a text file.</b>\n<a href="http://localhost:8080/question/1/download/">Download Test Case</a>:
+           # <a href="http://localhost:8080/question/1/submit">Submit Outputs</a>
+
+
+#@app.route('/question/<number>/submit')
+#def submit(number):
+ #   return static_file('index.html' , root=dir_path)
 
 
 @app.get('/question/<number>/download/')
 def download(number):
-    return static_file('inputs1.txt', root=dir_path+'/'+'files/questions/')
+    input_file_name = 'inputs'+number+'.txt'
+    return static_file(input_file_name, root=dir_path+'/'+'files/questions/')
 
 
 run(app, host = 'localhost', port = 8080)
