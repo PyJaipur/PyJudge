@@ -15,7 +15,7 @@ Timeline
 
 The project was officially announced in the [Telegram
 Group](https://t.me/pyjaipur) on the 9th of January 2019. It is an ongoing
-project and so you can jump in any time!
+project and so you can jump in any time! Here is the link to the [Pyjudge Telegram group](https://t.me/joinchat/HNTGNFPd8dHx3OeY94LvYg) !
 
 Pre-requisite
 ----------------
