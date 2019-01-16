@@ -1,7 +1,7 @@
 ## ISSUE Template 
 
 
-* **I am submitting this regarding a**
+* **I am submitting this regarding a :**
 	
 	- [ ] Bug report 
 	- [ ] Feature request 
