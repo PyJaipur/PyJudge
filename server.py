@@ -43,13 +43,7 @@ def file_upload():
 
     with open('./files/expected_outputs/expected_output.txt','r') as f2 , open(userpath,'r') as f1:
         ans = True
-        for line1,line2 in zip(f1,f2):
-            if ans!=True:
-                break
-            elif line1!=line2:
-                ans = False
-            else:
-                continue
+        ans = f1.read().strip() == f2.read().strip()
 
     if ans==False:
         return "Wrong Answer!!"
