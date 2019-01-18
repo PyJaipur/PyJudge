@@ -4,10 +4,9 @@ import sys
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
-
-
 app = Bottle()
 
+expected = open('./files/expected_outputs/expected_output.txt').read()
 
 @app.route('/hello/<something>')
 def index(something):
@@ -33,17 +32,9 @@ def download(number):
 
 @app.route('/upload', method = 'POST')
 def file_upload():
-    upload = request.files.get('upload')
-    name, ext = os.path.splitext(upload.filename)
-
-    save_path = "./files/user_outputs/"
-    upload.save(save_path)  # appends upload.filename automatically
+    uploaded = request.files.get('upload').file.read() #uploaded outputs by user
     
-    userpath = "./files/user_outputs/" + name + '.' + ext
-
-    with open('./files/expected_outputs/expected_output.txt','r') as f2 , open(userpath,'r') as f1:
-        ans = True
-        ans = f1.read().strip() == f2.read().strip()
+    ans = (uploaded==expected)
 
     if ans==False:
         return "Wrong Answer!!"
