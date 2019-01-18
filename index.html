@@ -36,15 +36,15 @@
 			<div class="column submit-column">
 				<div class="shift-center">
 					<!--Submission-->
-					<form action="/destination_url">   
+					<form action="/upload", method = "post", enctype = "multipart/form-data">   
 					   <!-- URL can be added where file is to be stored -->
 					   <p>All submissions will be tested on the already mentioned criterias. 
 					   To read the criterias, click <a href="#">here</a>.
 					   You have to submit your code in a file.
-					   You can submit the code in any language. 
+					   You can submit the code in any language.
 					   You can upload the file below.</p>
-					   <input type="file" name="code">
-					   <input type="submit">
+					   <input type="file" name="upload">
+					   <input type="submit" value = "Start upload">
 					</form>
 				</div>
 			</div>
