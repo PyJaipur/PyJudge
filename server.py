@@ -34,7 +34,8 @@ def download(number):
 @app.route('/upload', method = 'POST')
 def file_upload():
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
-    
+    expected.strip(' ')
+    uploaded.strip(' ')
     ans = (uploaded==expected)
 
     if ans==False:
