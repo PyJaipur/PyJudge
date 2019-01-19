@@ -38,7 +38,7 @@ def file_upload():
     uploaded.strip()
     ans = (uploaded==expected)
 
-    if ans==False:
+    if not ans:
         return "Wrong Answer!!"
     else: 
         return "Solved! Great Job!"
