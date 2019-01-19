@@ -25,10 +25,13 @@ def download(number):
 def file_upload(number):
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
 
+
     current_time = datetime.datetime.now()
     global expected
     global no_of_attempts
     global user_attempt_history
+    global expected
+
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded==expected)
