@@ -35,7 +35,7 @@ def download(number):
 def file_upload():
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
     expected = expected.strip()
-    uploaded.strip()
+    uploaded = uploaded.strip()
     ans = (uploaded==expected)
 
     if not ans:
