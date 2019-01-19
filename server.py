@@ -6,7 +6,8 @@ dir_path = os.path.dirname(path)
 
 app = Bottle()
 
-expected = open('./files/expected_outputs/expected_output.txt').read()
+with open('./files/expected_outputs/expected_output.txt', 'r') as fl:
+    expected = fl.read()
 
 @app.route('/hello/<something>')
 def index(something):
