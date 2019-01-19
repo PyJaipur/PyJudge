@@ -34,13 +34,15 @@ def download(number):
 @app.route('/upload', method = 'POST')
 def file_upload():
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
+    with open('./files/expected_outputs/expected_output.txt', 'r') as fl:
+        expected = fl.read()
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded==expected)
 
     if not ans:
         return "Wrong Answer!!"
-    else: 
+    else:
         return "Solved! Great Job!"
 
 
