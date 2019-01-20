@@ -14,7 +14,8 @@ with open('./files/expected_outputs/expected_output.txt', 'r') as fl:
 
 @app.get('/question/<number>')
 def question1(number):
-    return static_file('index.html', root=dir_path)
+    question_file_name = 'statement.html'
+    return static_file(question_file_name, root=dir_path+'/'+'files/questions/'+str(number)+'/')
 
 @app.get('/question/<number>/download/')
 def download(number):
