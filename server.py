@@ -41,6 +41,7 @@ def file_upload(number):
         user_attempt_history.append(['name', number, no_of_attempts, current_time])
         return "Wrong Answer!!"
     else:
+        no_of_attempts += 1
         user_attempt_history.append(['name', number, no_of_attempts, current_time])
         return "Solved! Great Job! "
 
