@@ -24,7 +24,9 @@ def question1(number):
 
 @app.get('/question/<path:path>')
 def download(path):
-    return static_file(path, root=question_dir)
+    # we don't want to supply the expected output
+    if 'expected.txt' not in path:
+        return static_file(path, root=question_dir)
 
 @app.post('/check/<number>')
 def file_upload(qno):
