@@ -31,7 +31,7 @@ def file_upload():
     time = datetime.datetime.now()
     t = time.strftime("%x") + ' ' + time.strftime("%I") + ":" + time.strftime("%M") + ":" + \
         time.strftime("%S") + " " + time.strftime("%p")
-    if u_name not in usernames.keys():
+    if u_name not in usernames:
         usernames[u_name] = [(uploaded, t)]
     else:
         usernames[u_name].append((uploaded,t))
