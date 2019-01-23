@@ -18,12 +18,13 @@ for qno in os.listdir(question_dir):
 
 @app.get('/question/<number>')
 def question1(number):
-    return static_file('index.html', root=dir_path)
+    global questions
+    statement = questions[number]['statement']
+    return template('index.html', qno=number, statement=statement)
 
-@app.get('/question/<number>/download/')
-def download(number):
-    input_file_name = 'inputs'+number+'.txt'
-    return static_file(input_file_name, root=dir_path+'/'+'files/questions/')
+@app.get('/question/<path:path>')
+def download(path):
+    return static_file(path, root=question_dir)
 
 @app.post('/check/<number>')
 def file_upload(qno):
