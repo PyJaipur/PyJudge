@@ -20,7 +20,7 @@ for qno in os.listdir(question_dir):
 def question1(number):
     global questions
     statement = questions[number]['statement']
-    return template('index.html', qno=number, statement=statement)
+    return template('question.html', qno=number, statement=statement)
 
 @app.get('/question/<path:path>')
 def download(path):
