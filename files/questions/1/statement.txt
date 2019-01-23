@@ -1,0 +1,5 @@
+Addition
+========
+
+In an input file, each line contains two space separated numbers. Add them and
+print their sum on a new line
