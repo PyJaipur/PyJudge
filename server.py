@@ -1,4 +1,3 @@
-import requests
 from bottle import Bottle, run, template, static_file, request, route
 import os
 import sys
