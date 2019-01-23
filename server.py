@@ -7,41 +7,44 @@ dir_path = os.path.dirname(path)
 app = Bottle()
 
 
-#with open('./files/expected_outputs/expected_output.txt', 'r') as fl:
-   # expected = fl.read()
+question_dir = 'files/questions'
+questions = {}
+for i in os.listdir(question_dir):
+    questions[i] = {}
+    with open(os.path.join(question_dir, i, 'output.txt'), 'r') as fl:
+        questions[i]['output'] = fl.read()
+    with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
+        questions[i]['question'] = fl.read()
+
 
 @app.get('/question/<number>')
-def question1(number):
-    file_path = './files/questions/'+ str(number) + '/statement.txt'
-    with open(file_path, 'r') as inputs:
-        ques = inputs.read()
-    download_link = '/question/' + str(number)+ '/download/'
-    return template('question_template.tpl', question = ques, link_to_download = download_link, number = number) # root=dir_path+'/'+'views'
+def question(number):
+
+    global questions
+    statement = questions[number]['question']
+    return(template('index.html', question_number = number, question = statement))
 
 
-@app.get('/question/<number>/download/')
-def download(number):
-    input_file_name = 'inputs.txt'
-    return static_file(input_file_name, root=dir_path+'/'+'files/questions/'+str(number)+'/')
+
+@app.get('/question/<path:path>') 
+def download(path):
+  return static_file(path, root=question_dir)
 
 
-@app.route('/question/<number>/upload', method = 'POST')
+@app.post('/check/<number>')
 def file_upload(number):
-    file_path = './files/questions/'+ str(number) + '/output.txt'
-    with open(file_path, 'r') as fl:
-        expected = fl.read()
+    
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
-
+    expected = questions[number]['output']
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded==expected)
     
     if not ans:
-        no_of_attempts += 1
-        user_attempt_history.append(['name', number, no_of_attempts, current_time])
+        
         return "Wrong Answer!!"
     else:
-        user_attempt_history.append(['name', number, no_of_attempts, current_time])
+       
         return "Solved! Great Job! "
 
 

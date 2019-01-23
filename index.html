@@ -20,9 +20,9 @@
 			</div>
 			<div class="column">
 				<div class="shift-center">
-					<p><!--Question-->Add Two Given Numbers.</p>
-					<a href="/question/1/download/">Download Test Case></a>
-				</div>
+					<p>{{question}}</p>
+					<a href="/question/{{question_number}}/inputs.txt">Download Test Case></a>
+				</div> 
 			</div>
 		    <div class="column column-20">
 				
@@ -36,7 +36,7 @@
 			<div class="column submit-column">
 				<div class="shift-center">
 					<!--Submission-->
-					<form action="/question/1/upload/", method = "post", enctype = "multipart/form-data">   
+					<form action="/check/{{question_number}}", method = "post", enctype = "multipart/form-data">   
 					   <!-- URL can be added where file is to be stored -->
 					   <p>All submissions will be tested on the already mentioned criterias. 
 					   To read the criterias, click <a href="#">here</a>.
