@@ -6,8 +6,15 @@ dir_path = os.path.dirname(path)
 
 app = Bottle()
 
-with open('./files/expected_outputs/expected_output.txt', 'r') as fl:
-    expected = fl.read()
+question_dir = 'files/questions'
+questions = {}
+for qno in os.listdir(question_dir):
+    questions[qno] = {}
+    with open(os.path.join(question_dir, qno, 'expected.txt'), 'r') as fl:
+        questions[qno]['expected'] = fl.read()
+    with open(os.path.join(question_dir, qno, 'statement.txt'), 'r') as fl:
+        questions[qno]['statement'] = fl.read()
+
 
 @app.get('/question/<number>')
 def question1(number):
@@ -18,17 +25,17 @@ def download(number):
     input_file_name = 'inputs'+number+'.txt'
     return static_file(input_file_name, root=dir_path+'/'+'files/questions/')
 
-@app.route('/upload', method = 'POST')
-def file_upload():
+@app.post('/check/<number>')
+def file_upload(qno):
     uploaded = request.files.get('upload').file.read() #uploaded outputs by user
-    global expected
-    expected = expected.strip()
+    global questions
+    expected = questions[qno]['expected'].strip()
     uploaded = uploaded.strip()
     ans = (uploaded==expected)
 
     if not ans:
         return "Wrong Answer!!"
-    else: 
+    else:
         return "Solved! Great Job!"
 
 
