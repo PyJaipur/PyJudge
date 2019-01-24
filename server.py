@@ -45,7 +45,6 @@ def file_upload(number):
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-
     usernames[u_name].append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
     if not ans:
