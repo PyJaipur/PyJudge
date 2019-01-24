@@ -29,12 +29,10 @@ def file_upload():
     # storing usernames' submission along with the timestamp at which they submit it
     global usernames
     time = datetime.datetime.now()
-    t = time.strftime("%x") + ' ' + time.strftime("%I") + ":" + time.strftime("%M") + ":" + \
-        time.strftime("%S") + " " + time.strftime("%p")
     if u_name not in usernames:
-        usernames[u_name] = [(uploaded, t)]
+        usernames[u_name] = [(uploaded, time)]
     else:
-        usernames[u_name].append((uploaded,t))
+        usernames[u_name].append((uploaded,time))
 
     global expected
     expected = expected.strip()
