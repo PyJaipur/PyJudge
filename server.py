@@ -15,9 +15,9 @@ question_dir = 'files/questions'
 Question = namedtuple('Question', 'output statement')
 Submission = namedtuple('Submission', 'question time result output')
 
-
 for i in os.listdir(question_dir):
-    with open(os.path.join(question_dir, i, 'output.txt'), 'r') as fl:
+    # read the correct output as bytes object
+    with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
         output = fl.read()
     with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
         statement = fl.read()
@@ -39,15 +39,15 @@ def download(path):
 def file_upload(number):
     u_name = request.forms.get('username')  # accepting username
     time = datetime.datetime.now()
+    # type(uploaded) == <class 'bytes'>
     uploaded = request.files.get('upload').file.read()  # uploaded outputs by user
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-    # storing submission details
+
     usernames[u_name].append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
-    print(usernames)
     if not ans:
         return "Wrong Answer!!"
     else:
