@@ -48,9 +48,9 @@ def file_upload(number):
     usernames[u_name].append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
     if not ans:
-        return "Wrong Answer!!"
+        return 'Wrong answer'
     else:
-        return "Solved! Great Job! "
+        return 'Solved! Great Job!'
 
 
 run(app, host='localhost', port=8080)
