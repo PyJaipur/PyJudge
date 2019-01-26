@@ -1,0 +1,4 @@
+bottle==0.12.16
+Bottleneck==1.2.1
+requests==2.20.0
+
