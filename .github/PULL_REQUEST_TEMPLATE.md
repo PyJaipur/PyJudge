@@ -1,10 +1,5 @@
-## Thank You  for your contribution to the *PyJudge*
+# Thank You for your contribution to the *PyJudge*
 
-### Please mention the issue you have fixed 
-
-
-### Proposed Changes
-
-  -
-  -
-  -
+- [ ] My title is a short description of what I am trying to do
+- [ ] I have mentioned all the issues I am fixing
+- [ ] Proposed changes
