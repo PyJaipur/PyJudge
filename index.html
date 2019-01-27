@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
-
+<link rel="stylesheet" href="css/index.css" class="css">
 	<title>PyJudge</title>
 </head>
 <body>
@@ -20,8 +20,8 @@
 			</div>
 			<div class="column">
 				<div class="shift-center">
-					<p>{{question}}</p>
-					<a href="/question/{{question_number}}/inputs.txt">Download Test Case></a>
+					<p style="text-align: center;">{{question}}</p>
+                    <button><a href="/question/{{question_number}}/inputs.txt">Download Test Case</a></button>
 				</div> 
 			</div>
 		    <div class="column column-20">
@@ -38,20 +38,18 @@
 					<!--Submission-->
 					<form action="/check/{{question_number}}", method = "post", enctype = "multipart/form-data">   
 					   <!-- URL can be added where file is to be stored -->
-					   <p>All submissions will be tested on the already mentioned criterias. 
+					   <p style="text-align: center; margin-left: 200px; margin-right: 200px; font-family: cursive;">All submissions will be tested on the already mentioned criterias. 
 					   To read the criterias, click <a href="#">here</a>.
 					   You have to submit your code in a file.
 					   You can submit the code in any language.
 					   You can upload the file below.</p>
-					   Username: <input type="text" name = "username" placeholder = "Enter your user name" size = "40"><br><br>
-					   <input type="file" name="upload">
-					   <input type="submit" value = "Start upload">
+                      <input type="text" style="width:200px; height:30px; margin-top: 20px; margin-left:580px; text-align: center;" name="email" placeholder="Enter Username" required /><br><br><br>
+					   <input type="file" name="upload" style="margin-left: 600px"><br>
+					   <input type="submit" value = "Start upload" style="margin-left: 600px; margin-top: 20px;   border-radius: 20px; background-image: radial-gradient(white, black); height: 30px; width: 150px;">
 					</form>
 				</div>
 			</div>
-		    <div class="column column-20">
-				
-			</div>
+		    
 		</div>
 	</div>
 	<!--Main Part Starts-->
