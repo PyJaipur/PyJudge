@@ -81,23 +81,16 @@ To review:
 ## How To Contribute and Run Software
 * Fork This Repo by clicking on button as shown in image.
 ![Fork](screenshots/1.png)
-
 * now you sould have a copy of Repo for yourself with `username/pyjudge`.
 ![Clone](screenshots/2.png)
-
 * after this you will need to clone from the Green tab you can see in above image.
-
 * now let's come to your local machine.
     * open terminal
-    * create a folder "PyJudge" by `$ mkdir PyJudge`.
-    * go to folder `$ cd PyJudge`.
-    * initialize the git by ` $ git init`.
-    * `$ git clone https://github.com/YourUsername/PyJudge.git`
+    * clone the repo `$ git clone https://github.com/YourUsername/PyJudge.git`
     * now you have a folder called PyJudge which has all your code files.
     * now go to that folder `cd PyJudge`.
-    * create a virtual enviroment `virtualenv venv`.
-    * activate your enviroment `source venv/bin/activate`.
-    * install dependencies `pip install -r requirements.txt`.
+    * install dependencies by `pipenv install`.
+    * run the env from `pipenv shell` 
     * and run the Software by `python server.py`.
 
     ### To Contribute
@@ -105,7 +98,7 @@ To review:
     *  create a new github branch in `/PyJudge/PyJudge` by `git checkout -b BranchName`
     * now make changes in your files.
     * when done see changes from `git status`. it will show all file which you updated or modified.
-    * add all those file to your git repo by `git add .`. `.` dot will add all files if you want a perticuler file to be added use, `git add filename`
+    * add all those file to your git repo by `git add -Av`. `Av` will add all files and verbose. if you want a perticuler file to be added use, `git add filename`
     * commit these changes `git commit -m message`.
     * `git push origin master` to push your code to your github.
     * go to yourown github repo to confirm changes and from there click the Pull request to make a PR on.
