@@ -78,12 +78,12 @@ To review:
 3. If something is not clear, ask for clarification. If someone has already asked just thumbs up that comment.
 4. Add an approving comment saying "Good work!". If someone has already commented thumbs up on that.
 
-## How to Run Software on your Local System
+## How to Run Software on your Local Machine
 1. Initially make sure that you have the python3 environment set in your system. For ubuntu check [this](http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/) and for windows check [this one] (https://www.python.org/downloads/) and install python in windows and remember to check the 'automatic path setup' option after the setup completion in windows.
-2. As this software works on bottle framework so you can checkout [this](https://bottlepy.org/docs/dev/) for how to install bottle. In is suggested that you install it through a 'pip' command. If pip is not supported in your system then, download pip script and run it in terminal, eg: $ python3.6 get-pip.py.
+2. As this software works on bottle framework so you can checkout [this](https://bottlepy.org/docs/dev/) for how to install bottle. It is suggested that you install it through a 'pip' command. If pip is not supported in your system then, download pip script and run it in terminal, eg: $ python3.6 get-pip.py.
 3. Now clone this repo in your local machine.
 4. $ cd PyJudge
 5. Run server.py ,eg : $ python3.6 server.py
 6. Now you can see your localhost running, eg: http://localhost:8080/
-7. After this, open your local browser and enter http://localhost:8080/question/<question_number> to view question.
+7. After this, open your local browser and enter http://localhost:8080/question/<question_number> to view the question.
 8. Solve it!! 
