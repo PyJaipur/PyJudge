@@ -1,35 +1,59 @@
-from bottle import Bottle, run, template, static_file
+from bottle import Bottle, run, template, static_file, request, route
 import os
 import sys
+import datetime
+from collections import defaultdict, namedtuple
+
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
-
-
-
 app = Bottle()
 
-@app.route('/hello/<something>')
-def index(something):
-    return template('<b>Hello My Name is {{something}}</b>', something = 'Shivank')
+questions = {}
+usernames = defaultdict(list)  # dictionary for storing the usernames
+question_dir = 'files/questions'
+
+Question = namedtuple('Question', 'output statement')
+Submission = namedtuple('Submission', 'question time result output')
+
+for i in os.listdir(question_dir):
+    if not i.isdigit():
+        continue
+    # read the correct output as bytes object
+    with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
+        output = fl.read()
+    with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
+        statement = fl.read()
+    questions[i] = Question(output=output, statement=statement)
+
 
 @app.get('/question/<number>')
-def question1(number):
-    return static_file('index.html' , root=dir_path)
-    #return '''<b>Add given two numbers in given text file and upload your solution in a text file.</b>\n<a href="http://localhost:8080/question/1/download/">Download Test Case</a>:
-           # <a href="http://localhost:8080/question/1/submit">Submit Outputs</a>
+def question(number):
+    statement = questions[number].statement
+    return template('index.html', question_number=number, question=statement)
 
 
-#@app.route('/question/<number>/submit')
-#def submit(number):
- #   return static_file('index.html' , root=dir_path)
+@app.get('/question/<path:path>')
+def download(path):
+    return static_file(path, root=question_dir)
 
 
-@app.get('/question/<number>/download/')
-def download(number):
-    input_file_name = 'inputs'+number+'.txt'
-    return static_file(input_file_name, root=dir_path+'/'+'files/questions/')
+@app.post('/check/<number>')
+def file_upload(number):
+    u_name = request.forms.get('username')  # accepting username
+    time = datetime.datetime.now()
+    # type(uploaded) == <class 'bytes'>
+    # uploaded outputs by user
+    uploaded = request.files.get('upload').file.read()
+    expected = questions[number].output
+    expected = expected.strip()
+    uploaded = uploaded.strip()
+    ans = (uploaded == expected)
+    usernames[u_name].append(Submission(question=number, time=time,
+                                        output=uploaded, result=ans))
+    if not ans:
+        return "Wrong Answer!!"
+    else:
+        return "Solved! Great Job! "
 
 
-run(app, host = 'localhost', port = 8080)
-
-
+run(app, host='localhost', port=8080)
