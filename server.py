@@ -19,11 +19,11 @@ for i in os.listdir(question_dir):
     if not i.isdigit():
         continue
     # read the correct output as bytes object
-        with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
-            output = fl.read()
-        with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
-            statement = fl.read()
-        questions[i] = Question(output=output, statement=statement)
+    with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
+        output = fl.read()
+    with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
+        statement = fl.read()
+    questions[i] = Question(output=output, statement=statement)
 
 
 @app.get('/question/<number>')
