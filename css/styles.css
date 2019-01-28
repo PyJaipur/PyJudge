@@ -31,6 +31,33 @@ body{
   clear: both;
 }
 
+.p1{
+	text-align: center;
+}
+.p2{
+	text-align: center; 
+	margin-left: 200px;
+	margin-right: 200px;
+	font-family: cursive;
+}
+.inp1{
+	width:200px;
+	height:30px;
+	margin-top: 20px; 
+	margin-left:580px; 
+	text-align: center;
+}
+.inp2{
+	margin-left: 600px
+}
+.inp3{
+	margin-left: 600px;
+	margin-top: 20px; 
+	border-radius: 20px; 
+	background-image: radial-gradient(white, black); 
+	height: 30px;
+	width: 150px;
+}
 .footer{
 	width: 100%;
 	border-top: 1px solid #000000;
