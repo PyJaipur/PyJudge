@@ -30,10 +30,11 @@ body{
   display: table;
   clear: both;
 }
-
+/*
 .p1{
 	text-align: center;
 }
+*/
 .p2{
 	text-align: center; 
 	margin-left: 200px;
@@ -47,9 +48,10 @@ body{
 	margin-left:580px; 
 	text-align: center;
 }
-.inp2{
+
+/*.inp2{
 	margin-left: 600px
-}
+}*/
 .inp3{
 	margin-left: 600px;
 	margin-top: 20px; 
