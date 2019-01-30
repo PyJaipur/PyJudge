@@ -15,13 +15,13 @@ Timeline
 
 The project was officially announced in the [Telegram
 Group](https://t.me/pyjaipur) on the 9th of January 2019. It is an ongoing
-project and so you can jump in any time! Here is the link to the [Pyjudge Telegram group](https://t.me/joinchat/HNTGNFPd8dHx3OeY94LvYg) !
+project and so you can jump in any time! Here is the link to the [Pyjudge Telegram group](https://t.me/joinchat/HNTGNFPd8dHx3OeY94LvYg)!
 
 Pre-requisite
 ----------------
 
 * knowledge of GitHub, not a must though you can learn basics in a couple of hours.
-* Presence on Telegram Group (install telegram first if error or join from desktop )
+* Presence on Telegram Group (install telegram first if an error or join from the desktop )
 * Fill this form with SOP(statement of purpose)
 * Dedication
 
@@ -79,11 +79,11 @@ To review:
 4. Add an approving comment saying "Good work!". If someone has already commented thumbs up on that.
 
 ## How To Contribute and Run Software
-* Fork This Repo by clicking on button as shown in image.
+* Fork This Repo by clicking on the button as shown in an image.
 ![Fork](screenshots/1.png)
-* now you sould have a copy of Repo for yourself with `username/pyjudge`.
+* now you should have a copy of Repo for yourself with `username/pyjudge`.
 ![Clone](screenshots/2.png)
-* after this you will need to clone from the Green tab you can see in above image.
+* after this, you will need to clone from the Green tab you can see in the above image.
 * now let's come to your local machine.
     * open terminal
     * clone the repo `$ git clone https://github.com/YourUsername/PyJudge.git`
@@ -97,11 +97,11 @@ To review:
     * follow the above setup once.
     *  create a new github branch in `/PyJudge/PyJudge` by `git checkout -b BranchName`
     * now make changes in your files.
-    * when done see changes from `git status`. it will show all file which you updated or modified.
-    * add all those file to your git repo by `git add -Av`. `Av` will add all files and verbose. if you want a perticuler file to be added use, `git add filename`
+    * when done see changes from `git status`. it will show all the file which you updated or modified.
+    * add all those files to your git repo by `git add -Av`. `Av` will add all files and verbose. if you want a particular file to be added use, `git add filename`
     * commit these changes `git commit -m message`.
     * `git push origin master` to push your code to your github.
-    * go to yourown github repo to confirm changes and from there click the Pull request to make a PR on.
+    * Go to your own github repo to confirm changes and from there click the Pull request to make a PR on.
      
 
 
