@@ -16,6 +16,8 @@ Question = namedtuple('Question', 'output statement')
 Submission = namedtuple('Submission', 'question time result output')
 
 for i in os.listdir(question_dir):
+    if not i.isdigit():
+        continue
     # read the correct output as bytes object
     with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
         output = fl.read()
@@ -40,7 +42,8 @@ def file_upload(number):
     u_name = request.forms.get('username')  # accepting username
     time = datetime.datetime.now()
     # type(uploaded) == <class 'bytes'>
-    uploaded = request.files.get('upload').file.read()  # uploaded outputs by user
+    # uploaded outputs by user
+    uploaded = request.files.get('upload').file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
