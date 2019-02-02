@@ -52,5 +52,6 @@ def file_upload(number):
     else:
         return 'Solved! Great Job!'
 
-
-run(app, host='localhost', port=8080)
+if __name__ == '__main__':
+    #bottle.run()
+   run(app, host='localhost', port=8080)
