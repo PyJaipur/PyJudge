@@ -7,8 +7,10 @@ name = "pypi"
 bottle = "*"
 pip = "==18.0"
 
-[dev-packages]
+[dev - packages]
 requests = "*"
+pytest = "*"
+boddle = "*"
 
 [requires]
 python_version = "3.6"
