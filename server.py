@@ -37,6 +37,11 @@ def download(path):
     return static_file(path, root=question_dir)
 
 
+@app.get('/css/<path:path>')
+def download(path):
+    return static_file(path, root=PyJudge)
+
+
 @app.post('/check/<number>')
 def file_upload(number):
     u_name = request.forms.get('username')  # accepting username
