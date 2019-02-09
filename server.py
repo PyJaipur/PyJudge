@@ -37,7 +37,7 @@ def download(path):
     return static_file(path, root=question_dir)
 
 
-@route('/static/<filepath:path>')
+@app.get('/static/<filepath:path>')
 def server_static(filepath):
     return static_file(filepath, root='PyJudge/css')
 
