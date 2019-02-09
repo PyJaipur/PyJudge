@@ -39,7 +39,7 @@ def download(path):
 
 @app.get('/static/<filepath:path>')
 def server_static(filepath):
-    return static_file(filepath, root='PyJudge/css')
+    return static_file(filepath, root=os.path.join(dir_path, 'static'))
 
 
 @app.post('/check/<number>')
