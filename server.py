@@ -10,7 +10,7 @@ app = Bottle()
 
 questions = {}
 usernames = defaultdict(list)  # dictionary for storing the usernames
-question_dir = 'files/questions'
+question_dir = os.path.join(dir_path, 'questions')
 
 Question = namedtuple('Question', 'output statement')
 Submission = namedtuple('Submission', 'question time result output')
