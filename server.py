@@ -37,6 +37,11 @@ def download(path):
     return static_file(path, root=question_dir)
 
 
+@app.get('/static/<filepath:path>')
+def server_static(filepath):
+    return static_file(filepath, root=os.path.join(dir_path, 'static'))
+
+
 @app.post('/check/<number>')
 def file_upload(number):
     u_name = request.forms.get('username')  # accepting username
