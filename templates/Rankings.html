@@ -1,46 +1,48 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Rankings</title>
-		<style>
-			body {
-				font-family: "Avenir Next";
-  				text-align: middle;
-				}
-			table {
-  				font-family: arial, sans-serif;
- 				border-collapse: collapse;
-  				width: 100%;
-				}
+{% extends 'templates/base.html' %}
 
-			td, th {
-  				border: 1px solid #dddddd;
-  				text-align: middle;
-  				padding: 8px;
-				}
-
-			tr:nth-child(even) {
-  				background-color: #dddddd;
-				}
-		</style>
-	</head>
-	<body>
-		<header><h1>Rankings</h1></header>
-		<table>
-			<tr>
-				<th>User name</th>
-				<th>Score of user</th>
-				<th>Rank of user</th>
-			</tr>
-			% for name, rank, score in people :
-			<tr>
-				<td>{{name}}</td>
-				<td>{{score}}</td>
-				<td>{{rank}}</td>
-			</tr>
-			% end
-		</table> 
-		<footer></footer>
-	</body>
-</html>
+	{% block content %}
+	<title>Rankings</title>
+	<style>
+		body {
+			font-family: "Avenir Next";
+  			text-align: middle;
+			}
+		table {
+  			font-family: arial, sans-serif;
+ 			border-collapse: collapse;
+  			width: 100%;
+			}
+		td, th {
+			border: 1px solid #dddddd;
+			text-align: middle;
+			padding: 8px;
+			}
+		tr:nth-child(even) {
+			background-color: #dddddd;
+			}
+	</style>
+	{% endblock %}
+	
+	{% block content %}
+		<h1>Rankings</h1>
+	{% endblock %}
+	
+	{% block content %}
+	<table>
+		<tr>
+			<th>User name</th>
+			<th>Score of user</th>
+			<th>Rank of user</th>
+		</tr>
+		{% for name, rank, score in people : %}
+		<tr>
+			<td>{{name}}</td>
+			<td>{{score}}</td>
+			<td>{{rank}}</td>
+		</tr>
+		{% endfor %}
+	</table> 
+	{% endblock %}
+	
+	{% block content %}
+	{% endblock %}
