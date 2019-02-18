@@ -1,17 +1,17 @@
 {% extends 'templates/base.html' %}
 	
-	{% block content %}
+	{% block head %}
 	<link rel="stylesheet" type="text/css" href="/static/css/styles.css">
 	<link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
 	<link rel="stylesheet" href="/static/css/index.css" class="css">
 	<title>PyJudge</title>
 	{% endblock %}
 	
-	{% block content %}
+	{% block header %}
 		<h1>Submission Page</h1>
 	{% endblock %}
 
-	{% block content %}
+	{% block content1 %}
 			<div class="column">
 				<div class="shift-center">
 					<p style="text-align: center;">{{question}}</p>
@@ -20,7 +20,7 @@
 			</div>
 	{% endblock %}
 
-	{% block content %}
+	{% block content2 %}
 					<!--Submission-->
 					<form action="/check/{{question_number}}", method = "post", enctype = "multipart/form-data">   
 					   <!-- URL can be added where file is to be stored -->
