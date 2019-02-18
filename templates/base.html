@@ -2,13 +2,13 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		{% block content %}
+		{% block head %}
 		{% endblock %}
 	</head>
 	<body>
 		<!--Header Block-->
 		<header class="header shift-center">
-			{% block content %}
+			{% block header %}
 			{% endblock %}
 		</header>
 
@@ -18,7 +18,7 @@
 				<div class="column column-20">
 				
 				</div>
-				{% block content %}
+				{% block content1 %}
 				{% endblock %}
 				<div class="column column-20">
 				
@@ -31,7 +31,7 @@
 				</div>
 				<div class="column submit-column">
 					<div class="shift-center">
-						{% block content %}
+						{% block content2 %}
 						{% endblock %}
 					</div>
 				</div>
