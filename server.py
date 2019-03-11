@@ -1,4 +1,4 @@
-from bottle import Bottle, run, template, static_file, request, route
+from bottle import Bottle, run, template, static_file, request, route, redirect
 import os
 import sys
 import datetime
@@ -25,6 +25,9 @@ for i in os.listdir(question_dir):
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
+@app.route('/')
+def changePath():
+	redirect("/question/1")
 
 @app.get('/question/<number>')
 def question(number):
