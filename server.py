@@ -27,7 +27,6 @@ for i in os.listdir(question_dir):
 
 @app.route('/')
 def changePath():
-	print('a')
 	redirect("/question/1")
 
 @app.get('/question/<number>')
