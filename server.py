@@ -25,6 +25,11 @@ for i in os.listdir(question_dir):
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
+@app.get('/')
+def redirect():
+	number = '1'
+	statement = questions[number].statement
+	return template('index.html', question_number=number, question=statement)
 
 @app.get('/question/<number>')
 def question(number):
