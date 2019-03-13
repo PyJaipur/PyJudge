@@ -44,6 +44,13 @@ def download(path):
 def server_static(filepath):
     return static_file(filepath, root=os.path.join(dir_path, 'static'))
 
+@app.get('/ranking')
+def rankings():
+	people=[]
+	for u_name in usernames.keys():
+		print(u_name)
+		people.append(u_name)
+	return template('Rankings.html', people=people)
 
 @app.post('/check/<number>')
 def file_upload(number):
