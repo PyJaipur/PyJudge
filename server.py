@@ -1,3 +1,15 @@
+class User:
+	def __init__(self):
+		self.score = 0
+		self.solvedQuestions = set()
+		self.submissions = list()
+	def getScore(self):
+		return self.score
+	def incrementScore(self):
+		self.score += 1
+	def addQuestion(self,number):
+		self.solvedQuestions.add(int(number))
+
 from bottle import Bottle, run, template, static_file, request, route, redirect
 import os
 import sys
@@ -48,8 +60,11 @@ def server_static(filepath):
 def rankings():
 	people=[]
 	for u_name in usernames.keys():
-		print(u_name)
-		people.append(u_name)
+		people.append([u_name,usernames[u_name].getScore(),0])
+	people.sort(key=lambda x: x[1],reverse=True)
+	# rank
+	for i in range(len(people)):
+		people[i][2] = i+1
 	return template('Rankings.html', people=people)
 
 @app.post('/check/<number>')
@@ -63,11 +78,16 @@ def file_upload(number):
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-    usernames[u_name].append(Submission(question=number, time=time,
+    if not u_name in usernames.keys():
+    	usernames[u_name] = User()
+    usernames[u_name].submissions.append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
     if not ans:
         return "Wrong Answer!!"
     else:
+        if not (int(number) in usernames[u_name].solvedQuestions):
+        	usernames[u_name].incrementScore()
+        	usernames[u_name].addQuestion(number)
         return "Solved! Great Job! "
 
                                                             

@@ -33,11 +33,11 @@
 				<th>User name</th>
 				<th>Score of user</th>
 			</tr>
-			% for name in people :
+			% for name,score,rank in people :
 			<tr>
-				<td>rank</td>
+				<td>{{rank}}</td>
 				<td>{{name}}</td>
-				<td>0</td>
+				<td>{{score}}</td>
 			</tr>
 			% end
 		</table> 
