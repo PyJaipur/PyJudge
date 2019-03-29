@@ -16,7 +16,7 @@ dir_path = os.path.dirname(path)
 app = Bottle()
 
 questions = {}
-usernames = defaultdict(list)  # dictionary for storing the usernames
+usernames = defaultdict(User)  # dictionary for storing the usernames
 question_dir = 'files/questions'
 
 Question = namedtuple('Question', 'output statement')
@@ -55,6 +55,7 @@ def server_static(filepath):
 def rankings():
 	people=[]
 	for u_name in usernames:
+
 		people.append([u_name,len(usernames[u_name].solvedQuestions)])
 	people.sort(key=lambda x: x[1],reverse=True)
 	people = [(user, score, rank) for rank, (user, score) in enumerate(people, start=1)]
