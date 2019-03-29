@@ -59,7 +59,7 @@ def server_static(filepath):
 @app.get('/ranking')
 def rankings():
 	people=[]
-	for u_name in usernames.keys():
+	for u_name in usernames:
 		people.append([u_name,usernames[u_name].getScore(),0])
 	people.sort(key=lambda x: x[1],reverse=True)
 	# rank
