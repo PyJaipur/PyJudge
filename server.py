@@ -1,12 +1,7 @@
 class User:
 	def __init__(self):
-		self.score = 0
 		self.solvedQuestions = set()
 		self.submissions = list()
-	def getScore(self):
-		return self.score
-	def incrementScore(self):
-		self.score += 1
 	def addQuestion(self,number):
 		self.solvedQuestions.add(int(number))
 
@@ -59,12 +54,10 @@ def server_static(filepath):
 @app.get('/ranking')
 def rankings():
 	people=[]
-	for u_name in usernames.keys():
-		people.append([u_name,usernames[u_name].getScore(),0])
+	for u_name in usernames:
+		people.append([u_name,len(usernames[u_name].solvedQuestions)])
 	people.sort(key=lambda x: x[1],reverse=True)
-	# rank
-	for i in range(len(people)):
-		people[i][2] = i+1
+	people = [(user, score, rank) for rank, (user, score) in enumerate(people, start=1)]
 	return template('Rankings.html', people=people)
 
 @app.post('/check/<number>')
@@ -78,7 +71,7 @@ def file_upload(number):
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-    if not u_name in usernames.keys():
+    if not u_name in usernames:
     	usernames[u_name] = User()
     usernames[u_name].submissions.append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
@@ -86,7 +79,6 @@ def file_upload(number):
         return "Wrong Answer!!"
     else:
         if not (int(number) in usernames[u_name].solvedQuestions):
-        	usernames[u_name].incrementScore()
         	usernames[u_name].addQuestion(number)
         return "Solved! Great Job! "
 
