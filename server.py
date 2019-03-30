@@ -1,15 +1,14 @@
-class User:
-	def __init__(self):
-		self.solvedQuestions = set()
-		self.submissions = list()
-	def addQuestion(self,number):
-		self.solvedQuestions.add(int(number))
-
 from bottle import Bottle, run, template, static_file, request, route, redirect
 import os
 import sys
 import datetime
 from collections import defaultdict, namedtuple
+from dataclasses import dataclass, field
+
+@dataclass
+class User:
+	submissions: list = field(default_factory = list)
+	solvedQuestions: set = field(default_factory = set)
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
@@ -55,7 +54,6 @@ def server_static(filepath):
 def rankings():
 	people=[]
 	for u_name in usernames:
-
 		people.append([u_name,len(usernames[u_name].solvedQuestions)])
 	people.sort(key=lambda x: x[1],reverse=True)
 	people = [(user, score, rank) for rank, (user, score) in enumerate(people, start=1)]
@@ -72,15 +70,13 @@ def file_upload(number):
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-    if not u_name in usernames:
-    	usernames[u_name] = User()
     usernames[u_name].submissions.append(Submission(question=number, time=time,
                                         output=uploaded, result=ans))
     if not ans:
         return "Wrong Answer!!"
     else:
         if not (int(number) in usernames[u_name].solvedQuestions):
-        	usernames[u_name].addQuestion(number)
+        	usernames[u_name].solvedQuestions.add(int(number))
         return "Solved! Great Job! "
 
                                                             
