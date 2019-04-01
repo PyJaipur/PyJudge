@@ -65,9 +65,10 @@ def file_upload(number):
     ans = (uploaded == expected)
     submission_record[u_name].append(Submission(question=number, time=time, output=uploaded, is_correct=ans))
     if not ans:
-        return "Wrong Answer!!"
+        return 'Wrong answer'
     else:
-        return "Solved! Great Job! "
+        return 'Solved! Great Job!'
 
-                                                            
-run(app, host='localhost', port=8080)
+if __name__ == '__main__':
+    #bottle.run()
+   run(app, host='localhost', port=8080)
