@@ -10,6 +10,7 @@ app = Bottle()
 
 questions = {}
 submission_record = defaultdict(list)  # dictionary for storing the usernames
+
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
@@ -62,7 +63,6 @@ def rankings():
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("Rankings.html", people=order)
 
-
 @app.post("/check/<number>")
 def file_upload(number):
     u_name = request.forms.get("username")  # accepting username
@@ -81,6 +81,5 @@ def file_upload(number):
         return "Wrong Answer!!"
     else:
         return "Solved! Great Job! "
-
 
 run(app, host="localhost", port=8080)
