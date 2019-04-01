@@ -1,0 +1,5 @@
+[
+  "test_server.py::test_question",
+  "test_server.py::test_download",
+  "test_server.py::test_file_upload"
+]
