@@ -9,11 +9,11 @@ dir_path = os.path.dirname(path)
 app = Bottle()
 
 questions = {}
-usernames = defaultdict(list)  # dictionary for storing the usernames
+submission_record = defaultdict(list)  # dictionary for storing the usernames
 question_dir = 'files/questions'
 
 Question = namedtuple('Question', 'output statement')
-Submission = namedtuple('Submission', 'question time result output')
+Submission = namedtuple('Submission', 'question time output is_correct')
 
 for i in os.listdir(question_dir):
     if not i.isdigit():
@@ -44,6 +44,13 @@ def download(path):
 def server_static(filepath):
     return static_file(filepath, root=os.path.join(dir_path, 'static'))
 
+@app.get('/ranking')
+def rankings():
+	order = [(user, len(set([attempt.question for attempt in submissions if attempt.is_correct])))
+              for user, submissions in submission_record.items()]
+	order.sort(key=lambda x: x[1], reverse=True)
+	order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
+	return template('Rankings.html', people=order)
 
 @app.post('/check/<number>')
 def file_upload(number):
@@ -56,8 +63,7 @@ def file_upload(number):
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
-    usernames[u_name].append(Submission(question=number, time=time,
-                                        output=uploaded, result=ans))
+    submission_record[u_name].append(Submission(question=number, time=time, output=uploaded, is_correct=ans))
     if not ans:
         return "Wrong Answer!!"
     else:

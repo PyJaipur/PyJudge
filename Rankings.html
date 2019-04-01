@@ -29,15 +29,15 @@
 		<header><h1>Rankings</h1></header>
 		<table>
 			<tr>
+				<th>Rank of user</th>
 				<th>User name</th>
 				<th>Score of user</th>
-				<th>Rank of user</th>
 			</tr>
-			% for name, rank, score in people :
+			% for name,score,rank in people :
 			<tr>
+				<td>{{rank}}</td>
 				<td>{{name}}</td>
 				<td>{{score}}</td>
-				<td>{{rank}}</td>
 			</tr>
 			% end
 		</table> 
