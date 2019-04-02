@@ -7,6 +7,7 @@ name = "pypi"
 bottle = "*"
 pip = "==18.0"
 pre-commit = "*"
+black = "*"
 
 [dev-packages]
 requests = "*"
