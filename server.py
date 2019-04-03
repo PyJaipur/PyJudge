@@ -10,64 +10,77 @@ app = Bottle()
 
 questions = {}
 submission_record = defaultdict(list)  # dictionary for storing the usernames
-question_dir = 'files/questions'
+question_dir = "files/questions"
 
-Question = namedtuple('Question', 'output statement')
-Submission = namedtuple('Submission', 'question time output is_correct')
+Question = namedtuple("Question", "output statement")
+Submission = namedtuple("Submission", "question time output is_correct")
 
 for i in os.listdir(question_dir):
     if not i.isdigit():
         continue
     # read the correct output as bytes object
-    with open(os.path.join(question_dir, i, 'output.txt'), 'rb') as fl:
+    with open(os.path.join(question_dir, i, "output.txt"), "rb") as fl:
         output = fl.read()
-    with open(os.path.join(question_dir, i, 'statement.txt'), 'r') as fl:
+    with open(os.path.join(question_dir, i, "statement.txt"), "r") as fl:
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
-@app.route('/')
-def changePath():
-	redirect("/question/1")
 
-@app.get('/question/<number>')
+@app.route("/")
+def changePath():
+    redirect("/question/1")
+
+
+@app.get("/question/<number>")
 def question(number):
     statement = questions[number].statement
-    return template('index.html', question_number=number, question=statement)
+    return template("index.html", question_number=number, question=statement)
 
 
-@app.get('/question/<path:path>')
+@app.get("/question/<path:path>")
 def download(path):
     return static_file(path, root=question_dir)
 
 
-@app.get('/static/<filepath:path>')
+@app.get("/static/<filepath:path>")
 def server_static(filepath):
-    return static_file(filepath, root=os.path.join(dir_path, 'static'))
+    return static_file(filepath, root=os.path.join(dir_path, "static"))
 
-@app.get('/ranking')
+
+@app.get("/ranking")
 def rankings():
-	order = [(user, len(set([attempt.question for attempt in submissions if attempt.is_correct])))
-              for user, submissions in submission_record.items()]
-	order.sort(key=lambda x: x[1], reverse=True)
-	order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
-	return template('Rankings.html', people=order)
+    order = [
+        (
+            user,
+            len(
+                set([attempt.question for attempt in submissions if attempt.is_correct])
+            ),
+        )
+        for user, submissions in submission_record.items()
+    ]
+    order.sort(key=lambda x: x[1], reverse=True)
+    order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
+    return template("Rankings.html", people=order)
 
-@app.post('/check/<number>')
+
+@app.post("/check/<number>")
 def file_upload(number):
-    u_name = request.forms.get('username')  # accepting username
+    u_name = request.forms.get("username")  # accepting username
     time = datetime.datetime.now()
     # type(uploaded) == <class 'bytes'>
     # uploaded outputs by user
-    uploaded = request.files.get('upload').file.read()
+    uploaded = request.files.get("upload").file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
-    ans = (uploaded == expected)
-    submission_record[u_name].append(Submission(question=number, time=time, output=uploaded, is_correct=ans))
+    ans = uploaded == expected
+    submission_record[u_name].append(
+        Submission(question=number, time=time, output=uploaded, is_correct=ans)
+    )
     if not ans:
         return "Wrong Answer!!"
     else:
         return "Solved! Great Job! "
 
-                                                            
-run(app, host='localhost', port=8080)
+
+run(app, host="localhost", port=8080)
