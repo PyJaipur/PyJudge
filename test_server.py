@@ -13,7 +13,8 @@ def test_download():
     assert requests.get(url+'/question/1/inputs.txt').status_code == 200
 
 def test_file_upload():
-    files= '/question/1/output.txt'
+    files= open('files/questions/1/output.txt')
     global url
     url += '/check/1/output.txt'
+
     assert requests.post(url, files = files).status_code == 200   # givin a error
