@@ -60,7 +60,7 @@ def rankings():
     ]
     order.sort(key=lambda x: x[1], reverse=True)
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
-    return template("Rankings.html", people=order)
+    return template("rankings.html", people=order)
 
 
 @app.post("/check/<number>")
