@@ -2,62 +2,46 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet" type="text/css" href="/static/css/styles.css">
-	<link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/index.css" class="css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+	<script src="/static/js/jquery.min.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
 	<title>PyJudge</title>
 </head>
 <body>
-	<header class="header shift-center">
-		<h1>Submission Page</h1>
-	</header>
-
-	<!--Main Part-->
-	<div class="highlight">
-		<div class="row">
-			<div class="column column-20">
-				
-			</div>
-			<div class="column">
-				<div class="shift-center">
-					<p style="text-align: center;">{{question}}</p>
-                    <button><a href="/question/{{question_number}}/inputs.txt">Download Test Case</a></button>
-				</div> 
-			</div>
-		    <div class="column column-20">
-				
-			</div>
+	<div class="container">
+		<header class="text-center">
+			<h1>Submission Page</h1>
+		</header>
+		<div class="container">
+			<p>{{question}}</p>
+			<a href="/question/{{question_number}}/inputs.txt" role="button" class="btn btn-primary">
+				Download Test Case
+			</a>
 		</div>
-
-		<div class="row">
-			<div class="column column-20">
-				
-			</div>
-			<div class="column submit-column">
-				<div class="shift-center">
-					<!--Submission-->
-					<form action="/check/{{question_number}}", method = "post", enctype = "multipart/form-data">   
-					   <!-- URL can be added where file is to be stored -->
-					   <p style="text-align: center; margin-left: 200px; margin-right: 200px; font-family: cursive;">All submissions will be tested on the already mentioned criterias. 
-					   To read the criterias, click <a href="#">here</a>.
-					   You have to submit your code in a file.
-					   You can submit the code in any language.
-					   You can upload the file below.</p>
-                      <input type="text" style="width:200px; height:30px; margin-top: 20px; margin-left:580px; text-align: center;" name="username" placeholder="Enter Username" required /><br><br><br>
-					   <input type="file" name="upload" style="margin-left: 600px"><br>
-					   <input type="submit" value = "Start upload" style="margin-left: 600px; margin-top: 20px;   border-radius: 20px; background-image: radial-gradient(white, black); height: 30px; width: 150px;">
-					</form>
+		<div class="container">
+			<p>
+				All submissions will be tested on the already mentioned criterias. 
+				To read the criterias, click <a href="#">here</a>.
+				You have to submit your code in a file.
+				You can submit the code in any language.
+				You can upload the file below.
+			</p>
+			<form action="/check/{{question_number}}" method = "post" enctype = "multipart/form-data">   
+				<div class="form-group">
+					<label for="username">Username: </label>
+					<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+					<input class="form-control" type="text" name="username" required />
 				</div>
-			</div>
-		    
+				<input type="file" name="upload" required />
+				<button class="btn btn-primary" type="submit">Upload</button>
+			</form>
+		
 		</div>
 	</div>
-	<!--Main Part Starts-->
-
-	<footer class="footer">
-		<div class="shift-center">
-			&copy Copyright 2019 | All Rights Reserved by <i>PyJaipur</i>
-		</div>
+	<footer class="page-footer text-center">
+		&copy Copyright 2019 | All Rights Reserved by <i>PyJaipur</i>
 	</footer>
+	
 </body>
 </html>
