@@ -3,44 +3,34 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Rankings</title>
-		<style>
-			body {
-				font-family: "Avenir Next";
-  				text-align: middle;
-				}
-			table {
-  				font-family: arial, sans-serif;
- 				border-collapse: collapse;
-  				width: 100%;
-				}
-
-			td, th {
-  				border: 1px solid #dddddd;
-  				text-align: middle;
-  				padding: 8px;
-				}
-
-			tr:nth-child(even) {
-  				background-color: #dddddd;
-				}
-		</style>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+		<script src="/static/js/jquery.min.js"></script>
+		<script src="/static/js/bootstrap.min.js"></script>
 	</head>
 	<body>
-		<header><h1>Rankings</h1></header>
-		<table>
-			<tr>
-				<th>Rank of user</th>
-				<th>User name</th>
-				<th>Score of user</th>
-			</tr>
-			% for name,score,rank in people :
-			<tr>
-				<td>{{rank}}</td>
-				<td>{{name}}</td>
-				<td>{{score}}</td>
-			</tr>
-			% end
-		</table> 
-		<footer></footer>
+		<div class="container text-center">
+			<div>
+				<h1>Rankings</h1>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Username</th>
+						<th>Score</th>
+					</tr>
+				</thead>
+				<tbody>
+					% for name,score,rank in people :
+					<tr>
+						<td>{{rank}}</td>
+						<td>{{name}}</td>
+						<td>{{score}}</td>
+					</tr>
+					% end
+				</tbody>
+			</table>
+		</div>
 	</body>
 </html>
