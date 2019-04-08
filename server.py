@@ -49,17 +49,16 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
-    with  shelve.open("submission_record.db") as submission_record:
-    order = [
-        (
-            user,
-            len(
-                set([attempt.question for attempt in submissions if attempt.is_correct])
-            ),
-        )
-        for user, submissions in submission_record.items()
-    ]
-    submission_record.close()
+    with shelve.open("submission_record.db") as submission_record:
+        order = [
+            (
+                user,
+                len(
+                    set([attempt.question for attempt in submissions if attempt.is_correct])
+                ),
+            )
+            for user, submissions in submission_record.items()
+        ]
     order.sort(key=lambda x: x[1], reverse=True)
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
@@ -75,16 +74,13 @@ def file_upload(number):
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
     
-     with shelve.open("submission_record.db") as submission_record:
-    if not u_name in submission_record:
-        submissions = []
-    else:
-        submissions = submission_record[u_name]
-    submissions.append(
-        Submission(question=number, time=time, output=uploaded, is_correct=ans)
-    )
-    submission_record[u_name] = submissions
-    submission_record.close()
+    with shelve.open("submission_record.db") as submission_record:
+        submissions = [] if u_name not in submission_record else submission_record[u_name]
+        #submissions = submission_record.get(u_name, list())
+        submissions.append(
+            Submission(question=number, time=time, output=uploaded, is_correct=ans)
+        )
+        submission_record[u_name] = submissions
     
     if not ans:
         return "Wrong Answer!!"
