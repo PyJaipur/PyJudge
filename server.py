@@ -49,7 +49,7 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
-    submission_record = shelve.open("submission_record.db")
+    with  shelve.open("submission_record.db") as submission_record:
     order = [
         (
             user,
@@ -75,8 +75,8 @@ def file_upload(number):
     uploaded = uploaded.strip()
     ans = (uploaded == expected)
     
-    submission_record = shelve.open("submission_record.db")
-    if not u_name in submission_record.keys():
+     with shelve.open("submission_record.db") as submission_record:
+    if not u_name in submission_record:
         submissions = []
     else:
         submissions = submission_record[u_name]
