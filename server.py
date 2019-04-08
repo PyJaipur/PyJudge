@@ -3,13 +3,13 @@ import os
 import sys
 import datetime
 from collections import defaultdict, namedtuple
+import shelve
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = Bottle()
 
 questions = {}
-submission_record = defaultdict(list)  # dictionary for storing the usernames
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
@@ -49,6 +49,7 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
+    submission_record = shelve.open("submission_record.db")
     order = [
         (
             user,
@@ -58,6 +59,7 @@ def rankings():
         )
         for user, submissions in submission_record.items()
     ]
+    submission_record.close()
     order.sort(key=lambda x: x[1], reverse=True)
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
@@ -67,16 +69,23 @@ def rankings():
 def file_upload(number):
     u_name = request.forms.get("username")  # accepting username
     time = datetime.datetime.now()
-    # type(uploaded) == <class 'bytes'>
-    # uploaded outputs by user
     uploaded = request.files.get("upload").file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
-    ans = uploaded == expected
-    submission_record[u_name].append(
+    ans = (uploaded == expected)
+    
+    submission_record = shelve.open("submission_record.db")
+    if not u_name in submission_record.keys():
+        submissions = []
+    else:
+        submissions = submission_record[u_name]
+    submissions.append(
         Submission(question=number, time=time, output=uploaded, is_correct=ans)
     )
+    submission_record[u_name] = submissions
+    submission_record.close()
+    
     if not ans:
         return "Wrong Answer!!"
     else:
