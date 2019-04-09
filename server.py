@@ -9,6 +9,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = Bottle()
 
+rec = "submission_record.db"
 questions = {}
 question_dir = "files/questions"
 
@@ -49,12 +50,18 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
-    with shelve.open("submission_record.db") as submission_record:
+    with shelve.open(rec) as submission_record:
         order = [
             (
                 user,
                 len(
-                    set([attempt.question for attempt in submissions if attempt.is_correct])
+                    set(
+                        [
+                            attempt.question
+                            for attempt in submissions
+                            if attempt.is_correct
+                        ]
+                    )
                 ),
             )
             for user, submissions in submission_record.items()
@@ -72,16 +79,18 @@ def file_upload(number):
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
-    ans = (uploaded == expected)
-    
-    with shelve.open("submission_record.db") as submission_record:
-        submissions = [] if u_name not in submission_record else submission_record[u_name]
-        #submissions = submission_record.get(u_name, list())
+    ans = uploaded == expected
+
+    with shelve.open("rec") as submission_record:
+        submissions = (
+            [] if u_name not in submission_record else submission_record[u_name]
+        )
+        # submissions = submission_record.get(u_name, list())
         submissions.append(
             Submission(question=number, time=time, output=uploaded, is_correct=ans)
         )
         submission_record[u_name] = submissions
-    
+
     if not ans:
         return "Wrong Answer!!"
     else:
