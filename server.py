@@ -9,7 +9,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = Bottle()
 
-rec = "submission_record.db"
+database_path = "submission_record.db"
 questions = {}
 question_dir = "files/questions"
 
@@ -50,7 +50,7 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
-    with shelve.open(rec) as submission_record:
+    with shelve.open(database_path) as submission_record:
         order = [
             (
                 user,
@@ -81,7 +81,7 @@ def file_upload(number):
     uploaded = uploaded.strip()
     ans = uploaded == expected
 
-    with shelve.open("rec") as submission_record:
+    with shelve.open(database_path) as submission_record:
         submissions = (
             [] if u_name not in submission_record else submission_record[u_name]
         )
