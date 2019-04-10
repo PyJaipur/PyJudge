@@ -22,7 +22,6 @@ Pre-requisite
 
 * knowledge of GitHub, not a must though you can learn basics in a couple of hours.
 * Presence on Telegram Group (install telegram first if an error or join from the desktop )
-* Fill this form with SOP(statement of purpose)
 * Dedication
 
 Benefits
