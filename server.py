@@ -3,13 +3,14 @@ import os
 import sys
 import datetime
 from collections import defaultdict, namedtuple
+import shelve
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = Bottle()
 
+database_path = "submission_record.db"
 questions = {}
-submission_record = defaultdict(list)  # dictionary for storing the usernames
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
@@ -49,15 +50,22 @@ def server_static(filepath):
 
 @app.get("/ranking")
 def rankings():
-    order = [
-        (
-            user,
-            len(
-                set([attempt.question for attempt in submissions if attempt.is_correct])
-            ),
-        )
-        for user, submissions in submission_record.items()
-    ]
+    with shelve.open(database_path) as submission_record:
+        order = [
+            (
+                user,
+                len(
+                    set(
+                        [
+                            attempt.question
+                            for attempt in submissions
+                            if attempt.is_correct
+                        ]
+                    )
+                ),
+            )
+            for user, submissions in submission_record.items()
+        ]
     order.sort(key=lambda x: x[1], reverse=True)
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
@@ -67,16 +75,22 @@ def rankings():
 def file_upload(number):
     u_name = request.forms.get("username")  # accepting username
     time = datetime.datetime.now()
-    # type(uploaded) == <class 'bytes'>
-    # uploaded outputs by user
     uploaded = request.files.get("upload").file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = uploaded == expected
-    submission_record[u_name].append(
-        Submission(question=number, time=time, output=uploaded, is_correct=ans)
-    )
+
+    with shelve.open(database_path) as submission_record:
+        submissions = (
+            [] if u_name not in submission_record else submission_record[u_name]
+        )
+        # submissions = submission_record.get(u_name, list())
+        submissions.append(
+            Submission(question=number, time=time, output=uploaded, is_correct=ans)
+        )
+        submission_record[u_name] = submissions
+
     if not ans:
         return "Wrong Answer!!"
     else:
