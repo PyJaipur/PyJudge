@@ -20,7 +20,7 @@ def test_download():
 def test_file_upload():
     files= {'upload' : open('files/questions/1/output.txt', 'rb')}
     global url
-    url += '/check/1'
+    check_url = url + '/check/1'
     assert requests.post(url, files = files).status_code == 200
 
   
