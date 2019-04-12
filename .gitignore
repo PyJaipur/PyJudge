@@ -66,4 +66,7 @@ target/
 venv/
 
 # Folder
+
 .pytest_cache
+submission_record.db
+
