@@ -1,0 +1,19 @@
+% include('base.html', title="PyJudge")
+<body>
+	<div class="container">
+		<header class="text-center">
+			<h1>{{code}}</h1>
+        </header>
+        <div class="container">
+            <p>
+                {{description}}
+            </p>
+        </div>
+        <div class="container">
+                % for qno in range(len(questions)):
+                    <a href="/contest/{{code}}/{{questions[qno]}}">{{qno+1}}</a><br />
+                % end
+        </div>
+	</div>
+</body>
+</html>
