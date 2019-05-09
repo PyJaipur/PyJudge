@@ -17,16 +17,28 @@ question_dir = "files/questions"
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct")
 # questions, code, description, start_time, end_time
-Contest = namedtuple("Contest","description questions")
+Contest = namedtuple("Contest","description questions start_time end_time")
 
 # dummy contests
-contests["PRACTICE"] = Contest(description="practice questions", questions=[1,2])
-contests["PASTCONTEST"] = Contest(description="somewhere in the past", questions=[1,2])
+contests["PRACTICE"] = Contest(
+    description="practice questions", questions=[1,2],
+    start_time = datetime.datetime(day=1, month=1, year=1),
+    end_time = datetime.datetime(day=1, month=1, year=9999)
+)
+contests["PASTCONTEST"] = Contest(
+    description="somewhere in the past", questions=[1,2],
+    start_time = datetime.datetime(day=1, month=11, year=2018),
+    end_time = datetime.datetime(day=1, month=12, year=2018)
+)
 contests["ONGOINGCONTEST"] = Contest(
-    description="somewhere in the present", questions=[3,4]
+    description="somewhere in the present", questions=[3,4],
+    start_time = datetime.datetime(day=1, month=4, year=2019),
+    end_time = datetime.datetime(day=1, month=6, year=2019)
 )
 contests["FUTURECONTEST"] = Contest(
-    description="somewhere in the future", questions=[5,6]
+    description="somewhere in the future", questions=[5,6],
+    start_time = datetime.datetime(day=1, month=1, year=2020),
+    end_time = datetime.datetime(day=1, month=10, year=2020)
 )
 
 for i in os.listdir(question_dir):
@@ -58,12 +70,19 @@ def contest(code):
         if(contest_code == code):
             description = contest.description
             questions = contest.questions
-    return template("contest.html", code=code, description=description, questions=questions)
+            start_time = contest.start_time
+            end_time = contest.end_time
+            if contest.start_time > datetime.datetime.now():
+                return "The contest had not started yet."
+    return template(
+        "contest.html", code=code, description=description, questions=questions,
+        start_time = start_time,
+        end_time = end_time
+    )
 
 @app.get("/question/<path:path>")
 def download(path):
     return static_file(path, root=question_dir)
-
 
 @app.get("/static/<filepath:path>")
 def server_static(filepath):

@@ -4,9 +4,24 @@
 		<h1>Contests</h1>
     </div>
     <div class="container">
-        % for code, contest in contests.items():
-            <a href="/contest/{{code}}">{{code}}</a><br>
-        % end
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Contest code</th>
+                    <th>Start time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for code, contest in contests.items():
+                <tr>
+                    <td><a href="/contest/{{code}}">{{code}}</a></td>
+                    <td>{{contest.start_time}}</td>
+                    <td>{{contest.end_time}}</td>
+                </tr>
+                % end
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
