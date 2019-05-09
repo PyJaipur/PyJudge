@@ -11,10 +11,27 @@ app = Bottle()
 
 database_path = "submission_record.db"
 questions = {}
+contests = []
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct")
+# questions, code, description, start_time, end_time
+Contest = namedtuple("Contest","code description questions")
+
+# dummy contests
+contests.append(
+    Contest(code="PRACTICE", description="practice questions", questions=[1,2])
+)
+contests.append(
+    Contest(code="PASTCONTEST", description="somewhere in the past", questions=[1,2])
+)
+contests.append(
+    Contest(code="ONGOINGCONTEST", description="somewhere in the present", questions=[3,4])
+)
+contests.append(
+    Contest(code="FUTURECONTEST", description="somewhere in the future", questions=[5,6])
+)
 
 for i in os.listdir(question_dir):
     if not i.isdigit():
@@ -26,10 +43,26 @@ for i in os.listdir(question_dir):
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
-
 @app.route("/")
 def changePath():
-    return redirect("/question/1")
+    return redirect("/dashboard")
+
+@app.get("/dashboard")
+def dashboard():
+    return template("dashboard.html", contests=contests)
+
+@app.get("/contest/<code>/<number>")
+def contest(code,number):
+    statement = questions[number].statement
+    return template("index.html", question_number=number, question=statement)
+
+@app.get("/contest/<code>")
+def contest(code):
+    for contest in contests:
+        if(contest.code == code):
+            description = contest.description
+            questions = contest.questions
+    return template("contest.html", code=code, description=description, questions=questions)
 
 @app.get("/question/<number>")
 def question(number):
