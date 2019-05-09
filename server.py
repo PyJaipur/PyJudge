@@ -11,26 +11,22 @@ app = Bottle()
 
 database_path = "submission_record.db"
 questions = {}
-contests = []
+contests = defaultdict()
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct")
 # questions, code, description, start_time, end_time
-Contest = namedtuple("Contest","code description questions")
+Contest = namedtuple("Contest","description questions")
 
 # dummy contests
-contests.append(
-    Contest(code="PRACTICE", description="practice questions", questions=[1,2])
+contests["PRACTICE"] = Contest(description="practice questions", questions=[1,2])
+contests["PASTCONTEST"] = Contest(description="somewhere in the past", questions=[1,2])
+contests["ONGOINGCONTEST"] = Contest(
+    description="somewhere in the present", questions=[3,4]
 )
-contests.append(
-    Contest(code="PASTCONTEST", description="somewhere in the past", questions=[1,2])
-)
-contests.append(
-    Contest(code="ONGOINGCONTEST", description="somewhere in the present", questions=[3,4])
-)
-contests.append(
-    Contest(code="FUTURECONTEST", description="somewhere in the future", questions=[5,6])
+contests["FUTURECONTEST"] = Contest(
+    description="somewhere in the future", questions=[5,6]
 )
 
 for i in os.listdir(question_dir):
@@ -58,8 +54,8 @@ def contest(code,number):
 
 @app.get("/contest/<code>")
 def contest(code):
-    for contest in contests:
-        if(contest.code == code):
+    for contest_code, contest in contests.items():
+        if(contest_code == code):
             description = contest.description
             questions = contest.questions
     return template("contest.html", code=code, description=description, questions=questions)
