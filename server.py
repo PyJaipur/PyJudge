@@ -60,12 +60,6 @@ def contest(code):
             questions = contest.questions
     return template("contest.html", code=code, description=description, questions=questions)
 
-@app.get("/question/<number>")
-def question(number):
-    statement = questions[number].statement
-    return template("index.html", question_number=number, question=statement)
-
-
 @app.get("/question/<path:path>")
 def download(path):
     return static_file(path, root=question_dir)
