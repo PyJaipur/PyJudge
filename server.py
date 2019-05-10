@@ -11,34 +11,38 @@ app = Bottle()
 
 database_path = "submission_record.db"
 questions = {}
-contests = defaultdict()
+contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct")
 # questions, code, description, start_time, end_time
-Contest = namedtuple("Contest","description questions start_time end_time")
+Contest = namedtuple("Contest", "description questions start_time end_time")
 
 # dummy contests
 contests["PRACTICE"] = Contest(
-    description="practice questions", questions=[1,2],
-    start_time = datetime.datetime(day=1, month=1, year=1),
-    end_time = datetime.datetime(day=1, month=1, year=9999)
+    description="practice questions",
+    questions=[1, 2],
+    start_time=datetime.datetime(day=1, month=1, year=1),
+    end_time=datetime.datetime(day=1, month=1, year=9999),
 )
 contests["PASTCONTEST"] = Contest(
-    description="somewhere in the past", questions=[1,2],
-    start_time = datetime.datetime(day=1, month=11, year=2018),
-    end_time = datetime.datetime(day=1, month=12, year=2018)
+    description="somewhere in the past",
+    questions=[1, 2],
+    start_time=datetime.datetime(day=1, month=11, year=2018),
+    end_time=datetime.datetime(day=1, month=12, year=2018),
 )
 contests["ONGOINGCONTEST"] = Contest(
-    description="somewhere in the present", questions=[3,4],
-    start_time = datetime.datetime(day=1, month=4, year=2019),
-    end_time = datetime.datetime(day=1, month=6, year=2019)
+    description="somewhere in the present",
+    questions=[3, 4],
+    start_time=datetime.datetime(day=1, month=4, year=2019),
+    end_time=datetime.datetime(day=1, month=6, year=2019),
 )
 contests["FUTURECONTEST"] = Contest(
-    description="somewhere in the future", questions=[5,6],
-    start_time = datetime.datetime(day=1, month=1, year=2020),
-    end_time = datetime.datetime(day=1, month=10, year=2020)
+    description="somewhere in the future",
+    questions=[5, 6],
+    start_time=datetime.datetime(day=1, month=1, year=2020),
+    end_time=datetime.datetime(day=1, month=10, year=2020),
 )
 
 for i in os.listdir(question_dir):
@@ -51,38 +55,36 @@ for i in os.listdir(question_dir):
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
+
 @app.route("/")
 def changePath():
     return redirect("/dashboard")
+
 
 @app.get("/dashboard")
 def dashboard():
     return template("dashboard.html", contests=contests)
 
+
 @app.get("/contest/<code>/<number>")
-def contest(code,number):
+def contest(code, number):
     statement = questions[number].statement
     return template("index.html", question_number=number, question=statement)
 
+
 @app.get("/contest/<code>")
 def contest(code):
-    for contest_code, contest in contests.items():
-        if(contest_code == code):
-            description = contest.description
-            questions = contest.questions
-            start_time = contest.start_time
-            end_time = contest.end_time
-            if contest.start_time > datetime.datetime.now():
-                return "The contest had not started yet."
-    return template(
-        "contest.html", code=code, description=description, questions=questions,
-        start_time = start_time,
-        end_time = end_time
-    )
+    if not code in contests.keys():
+        return "Contest does not exist"
+    if contests[code].start_time > datetime.datetime.now():
+        return "The contest had not started yet."
+    return template("contest.html", code=code, contest=contests[code])
+
 
 @app.get("/question/<path:path>")
 def download(path):
     return static_file(path, root=question_dir)
+
 
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
