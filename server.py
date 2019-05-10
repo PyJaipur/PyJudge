@@ -74,7 +74,7 @@ def contest(code, number):
 
 @app.get("/contest/<code>")
 def contest(code):
-    if not code in contests.keys():
+    if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
         return "The contest had not started yet."
