@@ -15,7 +15,7 @@ contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
-Submission = namedtuple("Submission", "question time output is_correct")
+Submission = namedtuple("Submission", "question time output is_correct contest")
 # questions, code, description, start_time, end_time
 Contest = namedtuple("Contest", "description questions start_time end_time")
 
@@ -69,7 +69,9 @@ def dashboard():
 @app.get("/contest/<code>/<number>")
 def contest(code, number):
     statement = questions[number].statement
-    return template("index.html", question_number=number, question=statement)
+    return template(
+        "index.html", question_number=number, contest=code, question=statement
+    )
 
 
 @app.get("/contest/<code>")
@@ -89,6 +91,36 @@ def download(path):
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
     return static_file(filepath, root=os.path.join(dir_path, "static"))
+
+
+@app.get("/ranking/<code>")
+def contest_ranking(code):
+    with shelve.open(database_path) as submission_record:
+        order = [
+            (
+                user,
+                len(
+                    set(
+                        [
+                            attempt.question
+                            for attempt in submissions
+                            if (
+                                attempt.is_correct
+                                and (int(attempt.question) in contests[code].questions)
+                                and attempt.contest == code
+                                and attempt.time <= contests[code].end_time
+                                and attempt.time >= contests[code].start_time
+                            )
+                        ]
+                    )
+                ),
+            )
+            for user, submissions in submission_record.items()
+        ]
+    order.sort(key=lambda x: x[1], reverse=True)
+    order = [entry for entry in order if entry[1] > 0]
+    order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
+    return template("rankings.html", people=order)
 
 
 @app.get("/ranking")
@@ -114,8 +146,8 @@ def rankings():
     return template("rankings.html", people=order)
 
 
-@app.post("/check/<number>")
-def file_upload(number):
+@app.post("/check/<code>/<number>")
+def file_upload(code, number):
     u_name = request.forms.get("username")  # accepting username
     time = datetime.datetime.now()
     uploaded = request.files.get("upload").file.read()
@@ -130,7 +162,13 @@ def file_upload(number):
         )
         # submissions = submission_record.get(u_name, list())
         submissions.append(
-            Submission(question=number, time=time, output=uploaded, is_correct=ans)
+            Submission(
+                question=number,
+                time=time,
+                output=uploaded,
+                is_correct=ans,
+                contest=code,
+            )
         )
         submission_record[u_name] = submissions
 
