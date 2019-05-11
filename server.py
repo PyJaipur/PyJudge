@@ -68,6 +68,10 @@ def dashboard():
 
 @app.get("/contest/<code>/<number>")
 def contest(code, number):
+    if not code in contests:
+        return "Contest does not exist"
+    if contests[code].start_time > datetime.datetime.now():
+        return "The contest had not started yet."
     statement = questions[number].statement
     return template(
         "index.html", question_number=number, contest=code, question=statement
