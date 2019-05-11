@@ -11,26 +11,38 @@ app = Bottle()
 
 database_path = "submission_record.db"
 questions = {}
-contests = []
+contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
-Submission = namedtuple("Submission", "question time output is_correct")
+Submission = namedtuple("Submission", "question time output is_correct contest")
 # questions, code, description, start_time, end_time
-Contest = namedtuple("Contest","code description questions")
+Contest = namedtuple("Contest", "description questions start_time end_time")
 
 # dummy contests
-contests.append(
-    Contest(code="PRACTICE", description="practice questions", questions=[1,2])
+contests["PRACTICE"] = Contest(
+    description="practice questions",
+    questions=[1, 2],
+    start_time=datetime.datetime(day=1, month=1, year=1),
+    end_time=datetime.datetime(day=1, month=1, year=9999),
 )
-contests.append(
-    Contest(code="PASTCONTEST", description="somewhere in the past", questions=[1,2])
+contests["PASTCONTEST"] = Contest(
+    description="somewhere in the past",
+    questions=[1, 2],
+    start_time=datetime.datetime(day=1, month=11, year=2018),
+    end_time=datetime.datetime(day=1, month=12, year=2018),
 )
-contests.append(
-    Contest(code="ONGOINGCONTEST", description="somewhere in the present", questions=[3,4])
+contests["ONGOINGCONTEST"] = Contest(
+    description="somewhere in the present",
+    questions=[3, 4],
+    start_time=datetime.datetime(day=1, month=4, year=2019),
+    end_time=datetime.datetime(day=1, month=6, year=2019),
 )
-contests.append(
-    Contest(code="FUTURECONTEST", description="somewhere in the future", questions=[5,6])
+contests["FUTURECONTEST"] = Contest(
+    description="somewhere in the future",
+    questions=[5, 6],
+    start_time=datetime.datetime(day=1, month=1, year=2020),
+    end_time=datetime.datetime(day=1, month=10, year=2020),
 )
 
 for i in os.listdir(question_dir):
@@ -43,31 +55,36 @@ for i in os.listdir(question_dir):
         statement = fl.read()
     questions[i] = Question(output=output, statement=statement)
 
+
 @app.route("/")
 def changePath():
     return redirect("/dashboard")
+
 
 @app.get("/dashboard")
 def dashboard():
     return template("dashboard.html", contests=contests)
 
+
 @app.get("/contest/<code>/<number>")
-def contest(code,number):
+def contest(code, number):
+    if not code in contests:
+        return "Contest does not exist"
+    if contests[code].start_time > datetime.datetime.now():
+        return "The contest had not started yet."
     statement = questions[number].statement
-    return template("index.html", question_number=number, question=statement)
+    return template(
+        "index.html", question_number=number, contest=code, question=statement
+    )
+
 
 @app.get("/contest/<code>")
 def contest(code):
-    for contest in contests:
-        if(contest.code == code):
-            description = contest.description
-            questions = contest.questions
-    return template("contest.html", code=code, description=description, questions=questions)
-
-@app.get("/question/<number>")
-def question(number):
-    statement = questions[number].statement
-    return template("index.html", question_number=number, question=statement)
+    if not code in contests:
+        return "Contest does not exist"
+    if contests[code].start_time > datetime.datetime.now():
+        return "The contest had not started yet."
+    return template("contest.html", code=code, contest=contests[code])
 
 
 @app.get("/question/<path:path>")
@@ -78,6 +95,36 @@ def download(path):
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
     return static_file(filepath, root=os.path.join(dir_path, "static"))
+
+
+@app.get("/ranking/<code>")
+def contest_ranking(code):
+    with shelve.open(database_path) as submission_record:
+        order = [
+            (
+                user,
+                len(
+                    set(
+                        [
+                            attempt.question
+                            for attempt in submissions
+                            if (
+                                attempt.is_correct
+                                and (int(attempt.question) in contests[code].questions)
+                                and attempt.contest == code
+                                and attempt.time <= contests[code].end_time
+                                and attempt.time >= contests[code].start_time
+                            )
+                        ]
+                    )
+                ),
+            )
+            for user, submissions in submission_record.items()
+        ]
+    order.sort(key=lambda x: x[1], reverse=True)
+    order = [entry for entry in order if entry[1] > 0]
+    order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
+    return template("rankings.html", people=order)
 
 
 @app.get("/ranking")
@@ -103,8 +150,8 @@ def rankings():
     return template("rankings.html", people=order)
 
 
-@app.post("/check/<number>")
-def file_upload(number):
+@app.post("/check/<code>/<number>")
+def file_upload(code, number):
     u_name = request.forms.get("username")  # accepting username
     time = datetime.datetime.now()
     uploaded = request.files.get("upload").file.read()
@@ -119,7 +166,13 @@ def file_upload(number):
         )
         # submissions = submission_record.get(u_name, list())
         submissions.append(
-            Submission(question=number, time=time, output=uploaded, is_correct=ans)
+            Submission(
+                question=number,
+                time=time,
+                output=uploaded,
+                is_correct=ans,
+                contest=code,
+            )
         )
         submission_record[u_name] = submissions
 

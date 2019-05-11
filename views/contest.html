@@ -6,12 +6,12 @@
         </header>
         <div class="container">
             <p>
-                {{description}}
+                {{contest.description}}
             </p>
         </div>
         <div class="container">
-                % for qno in range(len(questions)):
-                    <a href="/contest/{{code}}/{{questions[qno]}}">{{qno+1}}</a><br />
+                % for qno in range(len(contest.questions)):
+                    <a href="/contest/{{code}}/{{contest.questions[qno]}}">{{qno+1}}</a><br />
                 % end
         </div>
 	</div>
