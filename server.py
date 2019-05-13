@@ -1,4 +1,4 @@
-from bottle import Bottle, run, template, static_file, request, route, redirect
+from bottle import Bottle, run, template, static_file, request, route, redirect,error
 import os
 import sys
 import datetime
@@ -180,6 +180,11 @@ def file_upload(code, number):
         return "Wrong Answer!!"
     else:
         return "Solved! Great Job! "
+
+
+@app.error(404)
+def error404(error):
+    return template("error404.html")
 
 
 run(app, host="localhost", port=8080)
