@@ -170,7 +170,6 @@ def rankings():
     return template("rankings.html", people=order)
 
 
-@app.get("/checklogin")
 def logggedIn():
     if not request.get_cookie("s_id"):
         return False
