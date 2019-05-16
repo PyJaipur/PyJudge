@@ -1,23 +1,25 @@
-from bottle import Bottle, run, template, static_file, request, route, redirect,error
-import os
-import sys
-import datetime
+import bottle
+import os, sys, datetime
+import string, random
+
 from collections import defaultdict, namedtuple
 import shelve
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
-app = Bottle()
+app = bottle.Bottle()
 
 database_path = "submission_record.db"
+user_db = "user_record.db"
+sessions_db = "session_record.db"
 questions = {}
 contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct contest")
-# questions, code, description, start_time, end_time
 Contest = namedtuple("Contest", "description questions start_time end_time")
+User = namedtuple("User", "password")
 
 # dummy contests
 contests["PRACTICE"] = Contest(
@@ -48,7 +50,6 @@ contests["FUTURECONTEST"] = Contest(
 for i in os.listdir(question_dir):
     if not i.isdigit():
         continue
-    # read the correct output as bytes object
     with open(os.path.join(question_dir, i, "output.txt"), "rb") as fl:
         output = fl.read()
     with open(os.path.join(question_dir, i, "statement.txt"), "r") as fl:
@@ -56,45 +57,62 @@ for i in os.listdir(question_dir):
     questions[i] = Question(output=output, statement=statement)
 
 
+def login_required(function):
+    def login_redirect(*args, **kwargs):
+        if not logggedIn():
+            return bottle.template("home.html", message="Login required.")
+        return function(*args, **kwargs)
+    return login_redirect
+
 @app.route("/")
 def changePath():
-    return redirect("/dashboard")
+    return bottle.redirect("/home")
+
+
+@app.get("/home")
+def home():
+    if logggedIn():
+        return bottle.redirect("/dashboard")
+    return bottle.template("home.html", message="")
 
 
 @app.get("/dashboard")
+@login_required
 def dashboard():
-    return template("dashboard.html", contests=contests)
+    return bottle.template("dashboard.html", contests=contests)
 
 
 @app.get("/contest/<code>/<number>")
+@login_required
 def contest(code, number):
     if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
         return "The contest had not started yet."
     statement = questions[number].statement
-    return template(
-        "index.html", question_number=number, contest=code, question=statement
+    return bottle.template(
+        "question.html", question_number=number, contest=code, question=statement
     )
 
 
 @app.get("/contest/<code>")
+@login_required
 def contest(code):
     if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
         return "The contest had not started yet."
-    return template("contest.html", code=code, contest=contests[code])
+    return bottle.template("contest.html", code=code, contest=contests[code])
 
 
 @app.get("/question/<path:path>")
 def download(path):
-    return static_file(path, root=question_dir)
+    return bottle.static_file(path, root=question_dir)
 
 
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
-    return static_file(filepath, root=os.path.join(dir_path, "static"))
+    return bottle.static_file(filepath, root=os.path.join(dir_path, "static"))
 
 
 @app.get("/ranking/<code>")
@@ -124,7 +142,7 @@ def contest_ranking(code):
     order.sort(key=lambda x: x[1], reverse=True)
     order = [entry for entry in order if entry[1] > 0]
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
-    return template("rankings.html", people=order)
+    return bottle.template("rankings.html", people=order)
 
 
 @app.get("/ranking")
@@ -149,12 +167,68 @@ def rankings():
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
 
+def logggedIn():
+    if not bottle.request.get_cookie("s_id"):
+        return False
+    with shelve.open(sessions_db) as sessions:
+        return bottle.request.get_cookie("s_id") in sessions
+
+
+def createSession(username):
+    session_id = "".join(
+        random.choice(string.ascii_letters + string.digits) for i in range(20)
+    )
+    bottle.response.set_cookie(
+        "s_id",
+        session_id,
+        expires=datetime.datetime.now() + datetime.timedelta(days=30),
+    )
+    with shelve.open(sessions_db) as sessions:
+        sessions[session_id] = username
+    return bottle.redirect("/dashboard")
+
+
+@app.post("/login")
+def login():
+    username = bottle.request.forms.get("username")
+    password = bottle.request.forms.get("password")
+    with shelve.open(user_db) as users:
+        if not username in users:
+            return bottle.template("home.html", message="User does not exist.")
+        if users[username].password != password:
+            return bottle.template("home.html", message="Incorrect password.")
+    return createSession(username)
+
+
+@app.post("/register")
+def register():
+    username = bottle.request.forms.get("username")
+    password = bottle.request.forms.get("password")
+    with shelve.open(user_db) as users:
+        if username in users:
+            return bottle.template(
+                "home.html",
+                message="Username already exists. Select a different username",
+            )
+        users[username] = User(password=password)
+    return createSession(username)
+
+
+@app.get("/logout")
+def logout():
+    with shelve.open(sessions_db) as sessions:
+        del sessions[bottle.request.get_cookie("s_id")]
+    bottle.response.delete_cookie("s_id")
+    return bottle.redirect("/home")
+
 
 @app.post("/check/<code>/<number>")
+@login_required
 def file_upload(code, number):
-    u_name = request.forms.get("username")  # accepting username
+    with shelve.open(sessions_db) as sessions:
+        u_name = sessions[bottle.request.get_cookie("s_id")]
     time = datetime.datetime.now()
-    uploaded = request.files.get("upload").file.read()
+    uploaded = bottle.request.files.get("upload").file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
@@ -164,7 +238,6 @@ def file_upload(code, number):
         submissions = (
             [] if u_name not in submission_record else submission_record[u_name]
         )
-        # submissions = submission_record.get(u_name, list())
         submissions.append(
             Submission(
                 question=number,
@@ -186,5 +259,4 @@ def file_upload(code, number):
 def error404(error):
     return template("error.html" ,errorcode=error.status_code , errorbody = error.body)
 
-
-run(app, host="localhost", port=8080)
+bottle.run(app, host="localhost", port=8080)
