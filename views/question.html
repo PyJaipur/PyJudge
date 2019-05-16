@@ -18,12 +18,8 @@
 				You can submit the code in any language.
 				You can upload the file below.
 			</p>
-			<form action="/check/{{contest}}/{{question_number}}" method = "post" enctype = "multipart/form-data">   
-				<div class="form-group">
-					<label for="username">Username: </label>
-					<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-					<input class="form-control" type="text" name="username" required />
-				</div>
+			<form action="/check/{{contest}}/{{question_number}}" method = "post" enctype = "multipart/form-data">
+				Output file: <br />
 				<input type="file" name="upload" required />
 				<button class="btn btn-primary" type="submit">Upload</button>
 			</form>

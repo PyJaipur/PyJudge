@@ -10,6 +10,9 @@
             </p>
         </div>
         <div class="container">
+            <a href="/ranking/{{code}}" class="btn btn-primary">Rankings</a>
+        </div>
+        <div class="container">
                 % for qno in range(len(contest.questions)):
                     <a href="/contest/{{code}}/{{contest.questions[qno]}}">{{qno+1}}</a><br />
                 % end

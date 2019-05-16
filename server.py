@@ -1,4 +1,4 @@
-from bottle import Bottle, run, template, static_file, request, route, redirect
+from bottle import Bottle, run, template, static_file, request, route, redirect, response
 import os, sys, datetime
 import string, random
 from collections import defaultdict, namedtuple
@@ -50,7 +50,6 @@ contests["FUTURECONTEST"] = Contest(
 for i in os.listdir(question_dir):
     if not i.isdigit():
         continue
-    # read the correct output as bytes object
     with open(os.path.join(question_dir, i, "output.txt"), "rb") as fl:
         output = fl.read()
     with open(os.path.join(question_dir, i, "statement.txt"), "r") as fl:
@@ -64,12 +63,16 @@ def changePath():
 
 
 @app.get("/home")
-def dashboard():
+def home():
+    if logggedIn()==True:
+        return redirect("/dashboard")
     return template("home.html")
 
 
 @app.get("/dashboard")
 def dashboard():
+    if logggedIn()==False:
+        return redirect("/home")
     return template("dashboard.html", contests=contests)
 
 
@@ -81,12 +84,14 @@ def contest(code, number):
         return "The contest had not started yet."
     statement = questions[number].statement
     return template(
-        "index.html", question_number=number, contest=code, question=statement
+        "question.html", question_number=number, contest=code, question=statement
     )
 
 
 @app.get("/contest/<code>")
 def contest(code):
+    if logggedIn()==False:
+        return template("home.html")
     if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
@@ -156,12 +161,23 @@ def rankings():
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
 
+@app.get("/checklogin")
+def logggedIn():
+    if not request.get_cookie("s_id"):
+        return False
+    with shelve.open(sessions_db) as sessions:
+        if not request.get_cookie("s_id") in sessions:
+            return False
+    return True
 
 def createSession(username):
     session_id = "".join(
         random.choice(string.ascii_letters + string.digits) for i in range(20)
     )
-
+    response.set_cookie("s_id", session_id)
+    with shelve.open(sessions_db) as sessions:
+        sessions[session_id] = username
+    return redirect("/dashboard")
 
 @app.post("/login")
 def login():
@@ -190,17 +206,23 @@ def register():
         users[username] = User(
             password=password, firstname=firstname, lastname=lastname
         )
-    return "Registered."
+    return createSession(username)
 
 
 @app.get("/logout")
 def logout():
-    return "Logged out."
+    with shelve.open(sessions_db) as sessions:
+        del sessions[request.get_cookie("s_id")]
+    response.set_cookie("s_id","")
+    return redirect("/home")
 
 
 @app.post("/check/<code>/<number>")
 def file_upload(code, number):
-    u_name = request.forms.get("username")
+    if not logggedIn():
+        return "You need to log in to submit a solution."
+    with shelve.open(sessions_db) as sessions:
+        u_name = sessions[request.get_cookie("s_id")]
     time = datetime.datetime.now()
     uploaded = request.files.get("upload").file.read()
     expected = questions[number].output
