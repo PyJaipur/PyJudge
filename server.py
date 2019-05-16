@@ -1,6 +1,7 @@
 import bottle
 import os, sys, datetime
 import string, random
+
 from collections import defaultdict, namedtuple
 import shelve
 
@@ -253,5 +254,9 @@ def file_upload(code, number):
     else:
         return "Solved! Great Job! "
 
+
+@app.error(404)
+def error404(error):
+    return template("error.html" ,errorcode=error.status_code , errorbody = error.body)
 
 bottle.run(app, host="localhost", port=8080)
