@@ -1,4 +1,13 @@
-from bottle import Bottle, run, template, static_file, request, route, redirect, response
+from bottle import (
+    Bottle,
+    run,
+    template,
+    static_file,
+    request,
+    route,
+    redirect,
+    response,
+)
 import os, sys, datetime
 import string, random
 from collections import defaultdict, namedtuple
@@ -64,14 +73,14 @@ def changePath():
 
 @app.get("/home")
 def home():
-    if logggedIn()==True:
+    if logggedIn() == True:
         return redirect("/dashboard")
     return template("home.html")
 
 
 @app.get("/dashboard")
 def dashboard():
-    if logggedIn()==False:
+    if logggedIn() == False:
         return redirect("/home")
     return template("dashboard.html", contests=contests)
 
@@ -90,7 +99,7 @@ def contest(code, number):
 
 @app.get("/contest/<code>")
 def contest(code):
-    if logggedIn()==False:
+    if logggedIn() == False:
         return template("home.html")
     if not code in contests:
         return "Contest does not exist"
@@ -161,6 +170,7 @@ def rankings():
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
 
+
 @app.get("/checklogin")
 def logggedIn():
     if not request.get_cookie("s_id"):
@@ -170,14 +180,20 @@ def logggedIn():
             return False
     return True
 
+
 def createSession(username):
     session_id = "".join(
         random.choice(string.ascii_letters + string.digits) for i in range(20)
     )
-    response.set_cookie("s_id", session_id)
+    response.set_cookie(
+        "s_id",
+        session_id,
+        expires=datetime.datetime.now() + datetime.timedelta(days=30),
+    )
     with shelve.open(sessions_db) as sessions:
         sessions[session_id] = username
     return redirect("/dashboard")
+
 
 @app.post("/login")
 def login():
@@ -213,7 +229,7 @@ def register():
 def logout():
     with shelve.open(sessions_db) as sessions:
         del sessions[request.get_cookie("s_id")]
-    response.set_cookie("s_id","")
+    response.set_cookie("s_id", "")
     return redirect("/home")
 
 
