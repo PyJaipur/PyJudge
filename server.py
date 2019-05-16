@@ -1,23 +1,25 @@
 from bottle import Bottle, run, template, static_file, request, route, redirect
-import os
-import sys
-import datetime
+import os, sys, datetime
+import string, random
 from collections import defaultdict, namedtuple
 import shelve
+from http import cookies
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = Bottle()
 
 database_path = "submission_record.db"
+user_db = "user_record.db"
+sessions_db = "session_record.db"
 questions = {}
 contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct contest")
-# questions, code, description, start_time, end_time
 Contest = namedtuple("Contest", "description questions start_time end_time")
+User = namedtuple("User", "password firstname lastname")
 
 # dummy contests
 contests["PRACTICE"] = Contest(
@@ -59,6 +61,11 @@ for i in os.listdir(question_dir):
 @app.route("/")
 def changePath():
     return redirect("/dashboard")
+
+
+@app.get("/home")
+def dashboard():
+    return template("home.html")
 
 
 @app.get("/dashboard")
@@ -150,9 +157,50 @@ def rankings():
     return template("rankings.html", people=order)
 
 
+def createSession(username):
+    session_id = "".join(
+        random.choice(string.ascii_letters + string.digits) for i in range(20)
+    )
+
+
+@app.post("/login")
+def login():
+    username = request.forms.get("username")
+    password = request.forms.get("password")
+    with shelve.open(user_db) as users:
+        if not username in users:
+            return "user does not exist."
+        if users[username].password != password:
+            return "incorrect password."
+    return createSession(username)
+
+
+@app.post("/register")
+def register():
+    username = request.forms.get("username")
+    password = request.forms.get("password")
+    cpassword = request.forms.get("cpassword")
+    firstname = request.forms.get("firstname")
+    lastname = request.forms.get("lastname")
+    if password != cpassword:
+        return "Passwords do not match."
+    with shelve.open(user_db) as users:
+        if username in users:
+            return "User already exists."
+        users[username] = User(
+            password=password, firstname=firstname, lastname=lastname
+        )
+    return "Registered."
+
+
+@app.get("/logout")
+def logout():
+    return "Logged out."
+
+
 @app.post("/check/<code>/<number>")
 def file_upload(code, number):
-    u_name = request.forms.get("username")  # accepting username
+    u_name = request.forms.get("username")
     time = datetime.datetime.now()
     uploaded = request.files.get("upload").file.read()
     expected = questions[number].output
@@ -164,7 +212,6 @@ def file_upload(code, number):
         submissions = (
             [] if u_name not in submission_record else submission_record[u_name]
         )
-        # submissions = submission_record.get(u_name, list())
         submissions.append(
             Submission(
                 question=number,
