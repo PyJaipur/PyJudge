@@ -56,6 +56,13 @@ for i in os.listdir(question_dir):
     questions[i] = Question(output=output, statement=statement)
 
 
+def login_required(function):
+    def new_function():
+        if not logggedIn():
+            return bottle.template("home.html", message="Login required.")
+        return function()
+    return new_function
+
 @app.route("/")
 def changePath():
     return bottle.redirect("/dashboard")
@@ -158,16 +165,6 @@ def rankings():
     order.sort(key=lambda x: x[1], reverse=True)
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
-
-
-def login_required(function):
-    def new_function():
-        if not logggedIn():
-            return bottle.template("home.html", message="Login required.")
-        return function()
-
-    return new_function
-
 
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
