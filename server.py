@@ -184,9 +184,7 @@ def file_upload(code, number):
 
 @app.error(404)
 def error404(error):
-    print(dir(error))
-    print(error.status_code)
-    return template("error404.html" ,errorcode=error.status_code , errorbody = error.body)
+    return template("error.html" ,errorcode=error.status_code , errorbody = error.body)
 
 
 run(app, host="localhost", port=8080)
