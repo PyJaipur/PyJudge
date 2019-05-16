@@ -57,10 +57,10 @@ for i in os.listdir(question_dir):
 
 
 def login_required(function):
-    def login_redirect():
+    def login_redirect(*args, **kwargs):
         if not logggedIn():
             return bottle.template("home.html", message="Login required.")
-        return function()
+        return function(*args, **kwargs)
     return login_redirect
 
 @app.route("/")
