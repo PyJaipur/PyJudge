@@ -65,7 +65,7 @@ def login_required(function):
 
 @app.route("/")
 def changePath():
-    return bottle.redirect("/dashboard")
+    return bottle.redirect("/home")
 
 
 @app.get("/home")
@@ -82,6 +82,7 @@ def dashboard():
 
 
 @app.get("/contest/<code>/<number>")
+@login_required
 def contest(code, number):
     if not code in contests:
         return "Contest does not exist"
@@ -94,9 +95,8 @@ def contest(code, number):
 
 
 @app.get("/contest/<code>")
+@login_required
 def contest(code):
-    if not logggedIn():
-        return bottle.template("home.html")
     if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
