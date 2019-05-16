@@ -72,14 +72,14 @@ def changePath():
 
 @app.get("/home")
 def home():
-    if logggedIn() == True:
+    if logggedIn():
         return redirect("/dashboard")
     return template("home.html")
 
 
 @app.get("/dashboard")
 def dashboard():
-    if logggedIn() == False:
+    if not logggedIn():
         return redirect("/home")
     return template("dashboard.html", contests=contests)
 
@@ -98,7 +98,7 @@ def contest(code, number):
 
 @app.get("/contest/<code>")
 def contest(code):
-    if logggedIn() == False:
+    if not logggedIn():
         return template("home.html")
     if not code in contests:
         return "Contest does not exist"
@@ -174,7 +174,7 @@ def logggedIn():
     if not request.get_cookie("s_id"):
         return False
     with shelve.open(sessions_db) as sessions:
-        if not request.get_cookie("s_id") in sessions:
+        return request.get_cookie('s_id') in sessions
             return False
     return True
 
