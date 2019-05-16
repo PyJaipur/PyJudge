@@ -5,6 +5,12 @@
             PyJudge
         </h1>
     </div>
+    % if message:
+    <div class="alert alert-success alert-dismissible" style='width:auto;'>
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>Error!</strong> {{message}}
+    </div>
+    % end
     <div class="container">
         <ul class="nav nav-tabs">
             <li class="nav-item">
@@ -28,14 +34,8 @@
                 <form name="register" method="post" action="/register">
                     <label>Username:</label>
                     <input type="text" name="username" required /><br />
-                    <label>First name:</label>
-                    <input type="text" name="firstname" required /><br />
-                    <label>Last name:</label>
-                    <input type="text" name="lastname" /><br />
                     <label>Password:</label>
                     <input type="password" name="password" required /><br />
-                    <label>Confirm Password:</label>
-                    <input type="password" name="cpassword" required /><br />
                     <input class="btn btn-primary" type="submit" value="Register" />
                 </form>
             </div>
