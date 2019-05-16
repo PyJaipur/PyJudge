@@ -1,24 +1,17 @@
 % include('base.html', title="PyJudge")
-<body>
-  <script>
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = '/static/css/notfound.css';
-        document.getElementsByTagName('HEAD')[0].appendChild(link);
-  </script>
 
-	<div id="notfound">
-		<div class="notfound">
-			<div class="notfound-404">
-				<h1>Oops!</h1>
-			</div>
-			<h2>{{errorcode}} - {{errorbody}}</h2>
-			<p>The page you are looking for might have been removed had its name changed or is temporarily unavailable.</p>
-      <p></p>
-			<a href="/">Go To Homepage</a>
-		</div>
-	</div>
+<body class="h-100">
+  <div class="row h-100 align-items-center justify-content-center text-center" style="min-height:600px">
+    <div class="container" >
+      <h1 class="display-1">{{errorcode}}</h1>
+  		<h4 class="text-muted"> {{errorbody}}</h4>
+      <div class="text-center">
+        <a href="/" class='btn btn-outline-primary'>Go To Homepage</a>
+      </div>
+
+    </div>
+
+  </div>
 </body>
 
 </html>
