@@ -12,7 +12,6 @@ import os, sys, datetime
 import string, random
 from collections import defaultdict, namedtuple
 import shelve
-from http import cookies
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
