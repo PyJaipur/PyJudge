@@ -9,8 +9,6 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = bottle.Bottle()
 
-database_path = "submission_record.db"
-
 DATABASE_NAME = "data.db"
 
 questions = {}
@@ -18,7 +16,6 @@ contests = {}
 question_dir = "files/questions"
 
 Question = namedtuple("Question", "output statement")
-Submission = namedtuple("Submission", "question time output is_correct contest")
 Contest = namedtuple("Contest", "description questions start_time end_time")
 
 db = SqliteDatabase(DATABASE_NAME)
@@ -40,8 +37,19 @@ class Session(Model):
         database = db
 
 
+class Submission(Model):
+    username = CharField()
+    time = DateTimeField()
+    question = IntegerField()
+    contest = CharField()
+    is_correct = BooleanField()
+
+    class Meta:
+        database = db
+
+
 db.connect()
-db.create_tables([User, Session])
+db.create_tables([User, Session, Submission])
 
 # dummy contests
 contests["PRACTICE"] = Contest(
@@ -108,7 +116,7 @@ def dashboard():
 
 @app.get("/contest/<code>/<number>")
 @login_required
-def contest(code, number):
+def question(code, number):
     if not code in contests:
         return "Contest does not exist"
     if contests[code].start_time > datetime.datetime.now():
@@ -141,55 +149,36 @@ def server_static(filepath):
 
 @app.get("/ranking/<code>")
 def contest_ranking(code):
-    with shelve.open(database_path) as submission_record:
-        order = [
-            (
-                user,
-                len(
-                    set(
-                        [
-                            attempt.question
-                            for attempt in submissions
-                            if (
-                                attempt.is_correct
-                                and (int(attempt.question) in contests[code].questions)
-                                and attempt.contest == code
-                                and attempt.time <= contests[code].end_time
-                                and attempt.time >= contests[code].start_time
-                            )
-                        ]
-                    )
-                ),
-            )
-            for user, submissions in submission_record.items()
-        ]
-    order.sort(key=lambda x: x[1], reverse=True)
-    order = [entry for entry in order if entry[1] > 0]
-    order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
+    order = (
+        Submission.select(
+            Submission.username, fn.count(Submission.question).alias("score")
+        )
+        .where((Submission.is_correct == True) & (Submission.contest == code))
+        .group_by(Submission.username)
+        .order_by(fn.count(Submission.question).desc())
+    )
+    order = [(x.username, x.score) for x in order]
+    order = [
+        (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
+    ]
     return bottle.template("rankings.html", people=order)
 
 
 @app.get("/ranking")
 def rankings():
-    with shelve.open(database_path) as submission_record:
-        order = [
-            (
-                user,
-                len(
-                    set(
-                        [
-                            attempt.question
-                            for attempt in submissions
-                            if attempt.is_correct
-                        ]
-                    )
-                ),
-            )
-            for user, submissions in submission_record.items()
-        ]
-    order.sort(key=lambda x: x[1], reverse=True)
-    order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
-    return template("rankings.html", people=order)
+    order = (
+        Submission.select(
+            Submission.username, fn.count(Submission.question).alias("score")
+        )
+        .where(Submission.is_correct == True)
+        .group_by(Submission.username)
+        .order_by(fn.count(Submission.question).desc())
+    )
+    order = [(x.username, x.score) for x in order]
+    order = [
+        (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
+    ]
+    return bottle.template("rankings.html", people=order)
 
 
 def logggedIn():
@@ -252,29 +241,19 @@ def logout():
 @app.post("/check/<code>/<number>")
 @login_required
 def file_upload(code, number):
-    u_name = Session.get(Session.id == bottle.request.get_cookie("s_id")).username
+    username = Session.get(Session.id == bottle.request.get_cookie("s_id")).username
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
     expected = questions[number].output
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = uploaded == expected
-
-    with shelve.open(database_path) as submission_record:
-        submissions = (
-            [] if u_name not in submission_record else submission_record[u_name]
+    try:
+        Submission.create(
+            username=username, question=number, time=time, contest=code, is_correct=ans
         )
-        submissions.append(
-            Submission(
-                question=number,
-                time=time,
-                output=uploaded,
-                is_correct=ans,
-                contest=code,
-            )
-        )
-        submission_record[u_name] = submissions
-
+    except:
+        abort("Error in inserting submission to database.")
     if not ans:
         return "Wrong Answer!!"
     else:
