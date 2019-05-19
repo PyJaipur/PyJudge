@@ -2,7 +2,6 @@ import bottle
 import os, sys, datetime
 import string, random
 from collections import defaultdict, namedtuple
-import shelve
 from peewee import *
 
 path = os.path.abspath(__file__)
@@ -157,7 +156,7 @@ def contest_ranking(code):
         .group_by(Submission.username)
         .order_by(fn.count(Submission.question).desc())
     )
-    order = [(x.username, x.score) for x in order]
+    order = list(order.tuples())
     order = [
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
@@ -174,7 +173,7 @@ def rankings():
         .group_by(Submission.username)
         .order_by(fn.count(Submission.question).desc())
     )
-    order = [(x.username, x.score) for x in order]
+    order = list(order.tuples())
     order = [
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
