@@ -1,17 +1,20 @@
 import bottle
 import os, sys, datetime
 import string, random
-
 from collections import defaultdict, namedtuple
 import shelve
+from peewee import *
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 app = bottle.Bottle()
 
 database_path = "submission_record.db"
-user_db = "user_record.db"
+# user_db = "user_record.db"
 sessions_db = "session_record.db"
+
+DATABASE_NAME = "data.db"
+
 questions = {}
 contests = {}
 question_dir = "files/questions"
@@ -19,7 +22,20 @@ question_dir = "files/questions"
 Question = namedtuple("Question", "output statement")
 Submission = namedtuple("Submission", "question time output is_correct contest")
 Contest = namedtuple("Contest", "description questions start_time end_time")
-User = namedtuple("User", "password")
+
+db = SqliteDatabase(DATABASE_NAME)
+
+
+class User(Model):
+    username = CharField(unique=True)
+    password = CharField()
+
+    class Meta:
+        database = db
+
+
+db.connect()
+db.create_tables([User])
 
 # dummy contests
 contests["PRACTICE"] = Contest(
@@ -62,7 +78,9 @@ def login_required(function):
         if not logggedIn():
             return bottle.template("home.html", message="Login required.")
         return function(*args, **kwargs)
+
     return login_redirect
+
 
 @app.route("/")
 def changePath():
@@ -167,6 +185,7 @@ def rankings():
     order = [(user, score, rank) for rank, (user, score) in enumerate(order, start=1)]
     return template("rankings.html", people=order)
 
+
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
         return False
@@ -192,11 +211,15 @@ def createSession(username):
 def login():
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
-    with shelve.open(user_db) as users:
-        if not username in users:
-            return bottle.template("home.html", message="User does not exist.")
-        if users[username].password != password:
-            return bottle.template("home.html", message="Incorrect password.")
+    if (
+        len(
+            User.select().where(
+                (User.username == username) & (User.password == password)
+            )
+        )
+        == 0
+    ):
+        return bottle.template("home.html", message="Invalid credentials.")
     return createSession(username)
 
 
@@ -204,13 +227,11 @@ def login():
 def register():
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
-    with shelve.open(user_db) as users:
-        if username in users:
-            return bottle.template(
-                "home.html",
-                message="Username already exists. Select a different username",
-            )
-        users[username] = User(password=password)
+    if len(User.select().where(User.username == username)) > 0:
+        return bottle.template(
+            "home.html", message="Username already exists. Select a different username"
+        )
+    User.create(username=username, password=password)
     return createSession(username)
 
 
@@ -257,6 +278,7 @@ def file_upload(code, number):
 
 @app.error(404)
 def error404(error):
-    return template("error.html" ,errorcode=error.status_code , errorbody = error.body)
+    return template("error.html", errorcode=error.status_code, errorbody=error.body)
+
 
 bottle.run(app, host="localhost", port=8080)
