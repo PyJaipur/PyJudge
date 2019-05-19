@@ -45,6 +45,9 @@ class Submission(Model):
 
     class Meta:
         database = db
+        indexes = (
+            (("username","time"), True),
+        )
 
 
 db.connect()
