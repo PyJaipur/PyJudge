@@ -211,12 +211,9 @@ def login():
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
     if (
-        len(
-            User.select().where(
-                (User.username == username) & (User.password == password)
-            )
-        )
-        == 0
+        not User.select()
+        .where((User.username == username) & (User.password == password))
+        .exists()
     ):
         return bottle.template("home.html", message="Invalid credentials.")
     return createSession(username)
@@ -226,11 +223,12 @@ def login():
 def register():
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
-    if len(User.select().where(User.username == username)) > 0:
+    try:
+        User.create(username=username, password=password)
+    except IntegrityError:
         return bottle.template(
             "home.html", message="Username already exists. Select a different username"
         )
-    User.create(username=username, password=password)
     return createSession(username)
 
 
