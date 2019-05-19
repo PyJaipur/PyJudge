@@ -10,7 +10,6 @@ dir_path = os.path.dirname(path)
 app = bottle.Bottle()
 
 database_path = "submission_record.db"
-sessions_db = "session_record.db"
 
 DATABASE_NAME = "data.db"
 
@@ -33,8 +32,16 @@ class User(Model):
         database = db
 
 
+class Session(Model):
+    id = CharField(unique=True)
+    username = CharField()
+
+    class Meta:
+        database = db
+
+
 db.connect()
-db.create_tables([User])
+db.create_tables([User, Session])
 
 # dummy contests
 contests["PRACTICE"] = Contest(
@@ -188,8 +195,9 @@ def rankings():
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
         return False
-    with shelve.open(sessions_db) as sessions:
-        return bottle.request.get_cookie("s_id") in sessions
+    return (
+        Session.select().where(Session.id == bottle.request.get_cookie("s_id")).exists()
+    )
 
 
 def createSession(username):
@@ -201,8 +209,10 @@ def createSession(username):
         session_id,
         expires=datetime.datetime.now() + datetime.timedelta(days=30),
     )
-    with shelve.open(sessions_db) as sessions:
-        sessions[session_id] = username
+    try:
+        Session.create(id=session_id, username=username)
+    except IntegrityError:
+        return abort("Error! Please try again.")
     return bottle.redirect("/dashboard")
 
 
@@ -234,8 +244,7 @@ def register():
 
 @app.get("/logout")
 def logout():
-    with shelve.open(sessions_db) as sessions:
-        del sessions[bottle.request.get_cookie("s_id")]
+    Session.delete().where(Session.id == bottle.request.get_cookie("s_id")).execute()
     bottle.response.delete_cookie("s_id")
     return bottle.redirect("/home")
 
@@ -243,8 +252,7 @@ def logout():
 @app.post("/check/<code>/<number>")
 @login_required
 def file_upload(code, number):
-    with shelve.open(sessions_db) as sessions:
-        u_name = sessions[bottle.request.get_cookie("s_id")]
+    u_name = Session.get(Session.id == bottle.request.get_cookie("s_id")).username
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
     expected = questions[number].output
