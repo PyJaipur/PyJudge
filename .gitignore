@@ -64,7 +64,7 @@ target/
 
 .idea/
 venv/
-
+.vscode/
 # Folder
 
 .pytest_cache

@@ -10,7 +10,6 @@ dir_path = os.path.dirname(path)
 app = bottle.Bottle()
 
 database_path = "submission_record.db"
-# user_db = "user_record.db"
 sessions_db = "session_record.db"
 
 DATABASE_NAME = "data.db"
