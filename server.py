@@ -1,7 +1,6 @@
 import bottle
 import os, sys, datetime
 import string, random
-from collections import defaultdict, namedtuple
 from peewee import *
 
 path = os.path.abspath(__file__)
@@ -9,15 +8,28 @@ dir_path = os.path.dirname(path)
 app = bottle.Bottle()
 
 DATABASE_NAME = "data.db"
-
-questions = {}
-contests = {}
 question_dir = "files/questions"
 
-Question = namedtuple("Question", "output statement")
-Contest = namedtuple("Contest", "description questions start_time end_time")
-
 db = SqliteDatabase(DATABASE_NAME)
+
+
+class Contest(Model):
+    code = CharField(unique=True)
+    description = CharField()
+    start_time = DateTimeField()
+    end_time = DateTimeField()
+
+    class Meta:
+        database = db
+
+
+class ContestProblems(Model):
+    contest = CharField()
+    question = IntegerField()
+
+    class Meta:
+        database = db
+        indexes = ((("contest", "question"), True),)
 
 
 class User(Model):
@@ -45,48 +57,45 @@ class Submission(Model):
 
     class Meta:
         database = db
-        indexes = (
-            (("username","time"), True),
-        )
+        indexes = ((("username", "time"), True),)
 
 
 db.connect()
-db.create_tables([User, Session, Submission])
+db.create_tables([User, Session, Submission, ContestProblems, Contest])
 
-# dummy contests
-contests["PRACTICE"] = Contest(
+# dummy contest data
+Contest.get_or_create(
+    code="PRACTICE",
     description="practice questions",
-    questions=[1, 2],
     start_time=datetime.datetime(day=1, month=1, year=1),
     end_time=datetime.datetime(day=1, month=1, year=9999),
 )
-contests["PASTCONTEST"] = Contest(
+Contest.get_or_create(
+    code="PASTCONTEST",
     description="somewhere in the past",
-    questions=[1, 2],
     start_time=datetime.datetime(day=1, month=11, year=2018),
     end_time=datetime.datetime(day=1, month=12, year=2018),
 )
-contests["ONGOINGCONTEST"] = Contest(
+Contest.get_or_create(
+    code="ONGOINGCONTEST",
     description="somewhere in the present",
-    questions=[3, 4],
     start_time=datetime.datetime(day=1, month=4, year=2019),
     end_time=datetime.datetime(day=1, month=6, year=2019),
 )
-contests["FUTURECONTEST"] = Contest(
+Contest.get_or_create(
+    code="FUTURECONTEST",
     description="somewhere in the future",
-    questions=[5, 6],
     start_time=datetime.datetime(day=1, month=1, year=2020),
     end_time=datetime.datetime(day=1, month=10, year=2020),
 )
-
-for i in os.listdir(question_dir):
-    if not i.isdigit():
-        continue
-    with open(os.path.join(question_dir, i, "output.txt"), "rb") as fl:
-        output = fl.read()
-    with open(os.path.join(question_dir, i, "statement.txt"), "r") as fl:
-        statement = fl.read()
-    questions[i] = Question(output=output, statement=statement)
+ContestProblems.get_or_create(contest="PRACTICE", question=1)
+ContestProblems.get_or_create(contest="PRACTICE", question=2)
+ContestProblems.get_or_create(contest="PASTCONTEST", question=1)
+ContestProblems.get_or_create(contest="PASTCONTEST", question=2)
+ContestProblems.get_or_create(contest="ONGOINGCONTEST", question=3)
+ContestProblems.get_or_create(contest="ONGOINGCONTEST", question=4)
+ContestProblems.get_or_create(contest="FUTURECONTEST", question=5)
+ContestProblems.get_or_create(contest="FUTURECONTEST", question=6)
 
 
 def login_required(function):
@@ -113,17 +122,27 @@ def home():
 @app.get("/dashboard")
 @login_required
 def dashboard():
+    contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
 
 @app.get("/contest/<code>/<number>")
 @login_required
 def question(code, number):
-    if not code in contests:
-        return "Contest does not exist"
-    if contests[code].start_time > datetime.datetime.now():
+    if (
+        not ContestProblems.select()
+        .where(
+            (ContestProblems.contest == code)
+            & (ContestProblems.question == int(number))
+        )
+        .exists()
+    ):
+        return error404(404)
+    contest = Contest.get(Contest.code == code)
+    if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
-    statement = questions[number].statement
+    with open(os.path.join(question_dir, number, "statement.txt"), "rb") as fl:
+        statement = fl.read()
     return bottle.template(
         "question.html", question_number=number, contest=code, question=statement
     )
@@ -132,11 +151,15 @@ def question(code, number):
 @app.get("/contest/<code>")
 @login_required
 def contest(code):
-    if not code in contests:
-        return "Contest does not exist"
-    if contests[code].start_time > datetime.datetime.now():
-        return "The contest had not started yet."
-    return bottle.template("contest.html", code=code, contest=contests[code])
+    if not Contest.select().where(Contest.code == code).exists():
+        return error404(404)
+    contest = Contest.get(Contest.code == code)
+    questions = (
+        ContestProblems.select(ContestProblems.question)
+        .where(ContestProblems.contest == code)
+        .tuples()
+    )
+    return bottle.template("contest.html", contest=contest, questions=list(questions))
 
 
 @app.get("/question/<path:path>")
@@ -243,10 +266,20 @@ def logout():
 @app.post("/check/<code>/<number>")
 @login_required
 def file_upload(code, number):
+    if (
+        not ContestProblems.select()
+        .where(
+            (ContestProblems.contest == code)
+            & (ContestProblems.question == int(number))
+        )
+        .exists()
+    ):
+        return error404(404)
     username = Session.get(Session.id == bottle.request.get_cookie("s_id")).username
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
-    expected = questions[number].output
+    with open(os.path.join(question_dir, number, "output.txt"), "rb") as fl:
+        expected = fl.read()
     expected = expected.strip()
     uploaded = uploaded.strip()
     ans = uploaded == expected
