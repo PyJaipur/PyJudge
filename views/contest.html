@@ -14,7 +14,7 @@
         </div>
         <div class="container">
                 % for qno in range(len(questions)):
-                    <a href="/contest/{{contest.code}}/{{questions[qno][0]}}">{{qno+1}}</a><br />
+                    <a href="/contest/{{contest.code}}/{{questions[qno].question}}">{{qno+1}}</a><br />
                 % end
         </div>
 	</div>

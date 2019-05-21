@@ -22,7 +22,10 @@ class User(Model):
 
 
 class Session(Model):
-    id = CharField(unique=True)
+    def random_token():
+        return "".join([random.choice(string.ascii_letters) for _ in range(20)])
+
+    token = CharField(unique=True, default=random_token)
     user = ForeignKeyField(User)
 
     class Meta:
@@ -48,7 +51,7 @@ class Question(Model):
 
 
 class ContestProblems(Model):
-    contest = ForeignKeyField(Contest)
+    contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
 
     class Meta:
@@ -106,7 +109,6 @@ q3 = Question.get_or_create(q_no=3, author=test[0])
 q4 = Question.get_or_create(q_no=4, author=test[0])
 q5 = Question.get_or_create(q_no=5, author=test[0])
 q6 = Question.get_or_create(q_no=6, author=test[0])
-
 
 ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
 ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
@@ -173,13 +175,7 @@ def contest(code):
     if not Contest.select().where(Contest.code == code).exists():
         return bottle.abort(404, "no such contest")
     contest = Contest.get(Contest.code == code)
-    questions = (
-        ContestProblems.select(Question.q_no)
-        .where(ContestProblems.contest == contest)
-        .join(Question, on=(ContestProblems.question == Question.q_no))
-        .tuples()
-    )
-    return bottle.template("contest.html", contest=contest, questions=list(questions))
+    return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
 @app.get("/question/<path:path>")
@@ -232,23 +228,22 @@ def logggedIn():
     if not bottle.request.get_cookie("s_id"):
         return False
     return (
-        Session.select().where(Session.id == bottle.request.get_cookie("s_id")).exists()
+        Session.select()
+        .where(Session.token == bottle.request.get_cookie("s_id"))
+        .exists()
     )
 
 
 def createSession(username):
-    session_id = "".join(
-        random.choice(string.ascii_letters + string.digits) for i in range(20)
-    )
-    bottle.response.set_cookie(
-        "s_id",
-        session_id,
-        expires=datetime.datetime.now() + datetime.timedelta(days=30),
-    )
     try:
-        Session.create(id=session_id, user=User.get(User.username == username))
+        session = Session.create(user=User.get(User.username == username))
     except IntegrityError:
         return abort("Error! Please try again.")
+    bottle.response.set_cookie(
+        "s_id",
+        session.token,
+        expires=datetime.datetime.now() + datetime.timedelta(days=30),
+    )
     return bottle.redirect("/dashboard")
 
 
@@ -280,7 +275,7 @@ def register():
 
 @app.get("/logout")
 def logout():
-    Session.delete().where(Session.id == bottle.request.get_cookie("s_id")).execute()
+    Session.delete().where(Session.token == bottle.request.get_cookie("s_id")).execute()
     bottle.response.delete_cookie("s_id")
     return bottle.redirect("/home")
 
