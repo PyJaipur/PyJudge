@@ -137,7 +137,7 @@ def question(code, number):
         )
         .exists()
     ):
-        return error404(404)
+        return bottle.abort(404, 'no such contest')
     contest = Contest.get(Contest.code == code)
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
@@ -152,7 +152,7 @@ def question(code, number):
 @login_required
 def contest(code):
     if not Contest.select().where(Contest.code == code).exists():
-        return error404(404)
+        return bottle.abort(404, 'no such contest')
     contest = Contest.get(Contest.code == code)
     questions = (
         ContestProblems.select(ContestProblems.question)
