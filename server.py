@@ -62,8 +62,9 @@ class ContestProblems(Model):
 class Submission(Model):
     user = ForeignKeyField(User)
     time = DateTimeField()
-    question = ForeignKeyField(Question)
-    contest = ForeignKeyField(Contest)
+    contestProblem = ForeignKeyField(ContestProblems)
+    #question = ForeignKeyField(Question)
+    #contest = ForeignKeyField(Contest)
     is_correct = BooleanField()
 
     class Meta:
@@ -191,6 +192,7 @@ def server_static(filepath):
 
 @app.get("/ranking/<code>")
 def contest_ranking(code):
+    '''
     order = (
         Submission.select(User.username, fn.count(Question.q_no).alias("score"))
         .where(
@@ -200,8 +202,9 @@ def contest_ranking(code):
             & (Submission.time <= Contest.end_time)
         )
         .join(User, on=(Submission.user == User.id))
-        .join(Question, on=(Submission.question == Question.q_no))
-        .join(Contest, on=(Submission.contest == Contest.id))
+        .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id))
+        #.join(Question, on=(Submission.question == Question.q_no))
+        #.join(Contest, on=(Submission.contest == Contest.id))
         .group_by(Submission.user)
         .order_by(fn.count(Question.q_no).desc())
     )
@@ -210,10 +213,13 @@ def contest_ranking(code):
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
     return bottle.template("rankings.html", people=order)
+    '''
+    return "TODO"
 
 
 @app.get("/ranking")
 def rankings():
+    '''
     order = (
         Submission.select(User.username, fn.count(Question.q_no).alias("score"))
         .where(Submission.is_correct == True)
@@ -228,7 +234,8 @@ def rankings():
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
     return bottle.template("rankings.html", people=order)
-
+    '''
+    return "TODO"
 
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
@@ -289,13 +296,12 @@ def logout():
 @app.post("/check/<code>/<number>")
 @login_required
 def file_upload(code, number):
-    if (
-        not ContestProblems.select()
-        .where((Contest.code == code) & (Question.q_no == int(number)))
-        .join(Contest, on=(ContestProblems.contest == Contest.id))
-        .join(Question, on=(ContestProblems.question == Question.q_no))
-        .exists()
-    ):
+    try:
+        contestProblem = ContestProblems.get(
+            ContestProblems.contest == Contest.get(Contest.code == code),
+            ContestProblems.question == Question.get(Question.q_no == int(number))
+        )
+    except:
         return bottle.abort(404, "no such contest problem")
     user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
     time = datetime.datetime.now()
@@ -308,9 +314,8 @@ def file_upload(code, number):
     try:
         Submission.create(
             user=user,
-            question=Question.get(Question.q_no == number),
+            contestProblem = contestProblem,
             time=time,
-            contest=Contest.get(Contest.code == code),
             is_correct=ans,
         )
     except:
