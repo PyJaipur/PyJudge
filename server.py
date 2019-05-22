@@ -63,8 +63,6 @@ class Submission(Model):
     user = ForeignKeyField(User)
     time = DateTimeField()
     contestProblem = ForeignKeyField(ContestProblems)
-    #question = ForeignKeyField(Question)
-    #contest = ForeignKeyField(Contest)
     is_correct = BooleanField()
 
     class Meta:
@@ -192,50 +190,45 @@ def server_static(filepath):
 
 @app.get("/ranking/<code>")
 def contest_ranking(code):
-    '''
     order = (
-        Submission.select(User.username, fn.count(Question.q_no).alias("score"))
+        Submission.select(
+            User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
+        )
         .where(
             (Submission.is_correct == True)
-            & (Contest.code == code)
-            & (Submission.time >= Contest.start_time)
-            & (Submission.time <= Contest.end_time)
+            & (ContestProblems.contest == Contest.get(Contest.code == code))
         )
         .join(User, on=(Submission.user == User.id))
+        .switch()
         .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id))
-        #.join(Question, on=(Submission.question == Question.q_no))
-        #.join(Contest, on=(Submission.contest == Contest.id))
         .group_by(Submission.user)
-        .order_by(fn.count(Question.q_no).desc())
+        .order_by(fn.count(Submission.contestProblem.distinct()).desc())
     )
     order = list(order.tuples())
     order = [
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
     return bottle.template("rankings.html", people=order)
-    '''
-    return "TODO"
 
 
 @app.get("/ranking")
 def rankings():
-    '''
     order = (
-        Submission.select(User.username, fn.count(Question.q_no).alias("score"))
-        .where(Submission.is_correct == True)
+        Submission.select(
+            User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
+        )
+        .where((Submission.is_correct == True))
         .join(User, on=(Submission.user == User.id))
         .switch()
-        .join(Question, on=(Submission.question == Question.q_no))
+        .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id))
         .group_by(Submission.user)
-        .order_by(fn.count(Question.q_no).desc())
+        .order_by(fn.count(Submission.contestProblem.distinct()).desc())
     )
     order = list(order.tuples())
     order = [
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
     return bottle.template("rankings.html", people=order)
-    '''
-    return "TODO"
 
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
@@ -299,7 +292,7 @@ def file_upload(code, number):
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
-            ContestProblems.question == Question.get(Question.q_no == int(number))
+            ContestProblems.question == Question.get(Question.q_no == int(number)),
         )
     except:
         return bottle.abort(404, "no such contest problem")
@@ -313,10 +306,7 @@ def file_upload(code, number):
     ans = uploaded == expected
     try:
         Submission.create(
-            user=user,
-            contestProblem = contestProblem,
-            time=time,
-            is_correct=ans,
+            user=user, contestProblem=contestProblem, time=time, is_correct=ans
         )
     except:
         bottle.abort(500, "Error in inserting submission to database.")
