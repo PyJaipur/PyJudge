@@ -193,7 +193,12 @@ def server_static(filepath):
 def contest_ranking(code):
     order = (
         Submission.select(User.username, fn.count(Question.q_no).alias("score"))
-        .where((Submission.is_correct == True) & (Contest.code == code))
+        .where(
+            (Submission.is_correct == True)
+            & (Contest.code == code)
+            & (Submission.time >= Contest.start_time)
+            & (Submission.time <= Contest.end_time)
+        )
         .join(User, on=(Submission.user == User.id))
         .join(Question, on=(Submission.question == Question.q_no))
         .join(Contest, on=(Submission.contest == Contest.id))
@@ -292,9 +297,7 @@ def file_upload(code, number):
         .exists()
     ):
         return bottle.abort(404, "no such contest problem")
-    username = Session.get(
-        Session.token == bottle.request.get_cookie("s_id")
-    ).user.username
+    user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
     with open(os.path.join(question_dir, number, "output.txt"), "rb") as fl:
@@ -304,7 +307,7 @@ def file_upload(code, number):
     ans = uploaded == expected
     try:
         Submission.create(
-            user=User.get(User.username == username),
+            user=user,
             question=Question.get(Question.q_no == number),
             time=time,
             contest=Contest.get(Contest.code == code),
