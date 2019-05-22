@@ -175,6 +175,8 @@ def contest(code):
         contest = Contest.get(Contest.code == code)
     except Contest.DoesNotExist:
         return bottle.abort(404, "no such contest")
+    if contest.start_time > datetime.datetime.now():
+        return "The contest had not started yet."
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
