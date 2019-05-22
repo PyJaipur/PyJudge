@@ -172,9 +172,10 @@ def question(code, number):
 @app.get("/contest/<code>")
 @login_required
 def contest(code):
-    if not Contest.select().where(Contest.code == code).exists():
+    try:
+        contest = Contest.get(Contest.code == code)
+    except Contest.DoesNotExist:
         return bottle.abort(404, "no such contest")
-    contest = Contest.get(Contest.code == code)
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
@@ -238,7 +239,7 @@ def createSession(username):
     try:
         session = Session.create(user=User.get(User.username == username))
     except IntegrityError:
-        return abort("Error! Please try again.")
+        return bottle.abort(500, "Error! Please try again.")
     bottle.response.set_cookie(
         "s_id",
         session.token,
@@ -292,7 +293,7 @@ def file_upload(code, number):
     ):
         return bottle.abort(404, "no such contest problem")
     username = Session.get(
-        Session.id == bottle.request.get_cookie("s_id")
+        Session.token == bottle.request.get_cookie("s_id")
     ).user.username
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
@@ -310,7 +311,7 @@ def file_upload(code, number):
             is_correct=ans,
         )
     except:
-        abort("Error in inserting submission to database.")
+        bottle.abort(500, "Error in inserting submission to database.")
     if not ans:
         return "Wrong Answer!!"
     else:
