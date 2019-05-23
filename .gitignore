@@ -64,10 +64,8 @@ target/
 
 .idea/
 venv/
-
+.vscode/
 # Folder
 
 .pytest_cache
-submission_record.db
-user_record.db
-session_record.db
+data.db

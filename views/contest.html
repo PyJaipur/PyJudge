@@ -2,7 +2,7 @@
 <body>
 	<div class="container">
 		<header class="text-center">
-			<h1>{{code}}</h1>
+			<h1>{{contest.code}}</h1>
         </header>
         <div class="container">
             <p>
@@ -10,11 +10,11 @@
             </p>
         </div>
         <div class="container">
-            <a href="/ranking/{{code}}" class="btn btn-primary">Rankings</a>
+            <a href="/ranking/{{contest.code}}" class="btn btn-primary">Rankings</a>
         </div>
         <div class="container">
-                % for qno in range(len(contest.questions)):
-                    <a href="/contest/{{code}}/{{contest.questions[qno]}}">{{qno+1}}</a><br />
+                % for qno in range(len(questions)):
+                    <a href="/contest/{{contest.code}}/{{questions[qno].question}}">{{qno+1}}</a><br />
                 % end
         </div>
 	</div>
