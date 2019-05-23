@@ -10,4 +10,4 @@ python:
 script:
     - pip3 install pipenv
     - pipenv install --dev
-    - pipenv run pytest
+    - pipenv run pytest -v --disable-pytest-warning
