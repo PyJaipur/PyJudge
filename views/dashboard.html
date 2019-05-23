@@ -13,9 +13,9 @@
                 </tr>
             </thead>
             <tbody>
-                % for code, contest in contests.items():
+                % for contest in contests:
                 <tr>
-                    <td><a href="/contest/{{code}}">{{code}}</a></td>
+                    <td><a href="/contest/{{contest.code}}">{{contest.code}}</a></td>
                     <td>{{contest.start_time}}</td>
                     <td>{{contest.end_time}}</td>
                 </tr>
@@ -24,6 +24,7 @@
         </table>
     </div>
     <div class="container">
+			<a href="/stats" class="btn btn-primary">Statistics</a>
             <a href="/logout" class="btn btn-primary">Logout</a>
     </div>
 </body>

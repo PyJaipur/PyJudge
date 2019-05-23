@@ -4,6 +4,10 @@
 		<div>
 			<h1>User Statistics</h1>
 		</div>
+		<div class="container" style="height:3rem;">
+			<a href="/dashboard" class="btn btn-primary">Dashboard</a>
+			<a href="/logout" class="btn btn-primary">Logout</a>
+		</div>
 		<table class="table">
 			<thead>
 				<tr>
@@ -14,28 +18,18 @@
 		<table class="table">
 			<tbody style="height:20rem;display:inline-block;overflow-y:scroll">
 				<tr style="font-weight:bold;">
-					<td>Username</td>
-					<td>Question Number</td>
-					<td>Time submitted</td>
-					<td>Correct/Not Correct</td>
-					<td>Contest</td>
-					<script>
-						var date_list = [];
-					</script>
+					<td style="padding-right:10rem">Contest</td>
+					<td style="padding-right:6rem">Question Number</td>
+					<td style="padding-right:8rem">Time submitted</td>
+					<td style="padding-right:10rem">Correct/Not Correct</td>
 				</tr>
-				% for name,attempts in sub_history :
-				% for records in attempts :
+				% for sub_history in sub_history :
 				<tr>
-					<td>{{name}}</td>
-					<td>{{records.question}}</td>
-					<td>{{records.time.strftime("%d-%m-%Y %H:%M")}}</td>
-					<td>{{records.is_correct}}</td>
-					<td>{{records.contest}}</td>
-					<script>
-						date_list.push({{records.time}});
-					</script>
+					<td style="padding-right:10rem">{{sub_history[0]}}</td>
+					<td style="padding-right:6rem">{{sub_history[1]}}</td>
+					<td style="padding-right:8rem">{{sub_history[2].strftime("%d-%m-%Y %H:%M")}}</td>
+					<td style="padding-right:10rem">{{sub_history[3]}}</td>
 				</tr>
-				% end
 				% end
 			</tbody>
 		</table>
@@ -46,15 +40,20 @@
 				</tr>
 			</thead>
 		</table>
-		% for name,incorrect,correct,total in sub_stats :
+		% for sub_stats_correct in sub_stats_correct :
 		<script>
-			var no_incorrect = {{incorrect}};
-			var no_correct = {{correct}};
+			var no_correct = {{sub_stats_correct[0]}};
+		</script>
+		% end
+		% for sub_stats_total in sub_stats_total :
+		<script>
+			var no_total = {{sub_stats_total[0]}};
+			var no_incorrect = no_total - no_correct;
 		</script>
 		<table class="table">
 			<tbody>
 				<tr>
-					<td style="color:blue;">Total Submissions : {{total}}</td>
+					<td style="color:blue;">Total Submissions : {{sub_stats_total[0]}}</td>
 				</tr>
 				<tr>
 					<td id="piechart" style="padding-left:20rem"></td>
@@ -63,7 +62,6 @@
 			</tbody>
 		</table>
 		% end
-		
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js">
 		</script>
 		
