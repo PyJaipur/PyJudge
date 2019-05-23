@@ -12,7 +12,6 @@ question_dir = "files/questions"
 
 db = SqliteDatabase(DATABASE_NAME)
 
-
 class User(Model):
     username = CharField(unique=True)
     password = CharField()
@@ -40,39 +39,6 @@ class Contest(Model):
 
     class Meta:
         database = db
-
-class Question(Model):
-    q_no = IntegerField(unique=True)
-    author = ForeignKeyField(User)
-
-    class Meta:
-        database = db
-
-
-class ContestProblems(Model):
-    contest = ForeignKeyField(Contest, backref="questions")
-    question = ForeignKeyField(Question)
-
-    class Meta:
-        database = db
-        indexes = ((("contest", "question"), True),)
-
-
-class Submission(Model):
-    user = ForeignKeyField(User)
-    time = DateTimeField()
-    contestProblem = ForeignKeyField(ContestProblems)
-    is_correct = BooleanField()
-
-    class Meta:
-        database = db
-        indexes = ((("user", "time"), True),)
-
-
-db.connect()
-db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
-
-=======
 
 class Question(Model):
     q_no = IntegerField(unique=True)
