@@ -1,0 +1,13 @@
+language: python
+python:
+    - "3.6"
+    - "3.7-dev"
+
+# command to install dependencies
+#install: "make"
+
+# command to run tests
+script:
+    - pip3 install pipenv
+    - pipenv install --dev
+    - pipenv run pytest
