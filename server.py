@@ -12,15 +12,22 @@ question_dir = "files/questions"
 
 db = SqliteDatabase(DATABASE_NAME)
 
-
+"""
+User :Class
+      Defines username and password for individual user.
+"""
 class User(Model):
     username = CharField(unique=True)
     password = CharField()
 
     class Meta:
         database = db
-
-
+        
+"""
+Session :Class
+        Generates randam token for every section
+        new Token is assigned to every User for every new session
+"""  
 class Session(Model):
     def random_token():
         return "".join([random.choice(string.ascii_letters) for _ in range(20)])
@@ -31,7 +38,13 @@ class Session(Model):
     class Meta:
         database = db
 
-
+"""
+Contest :Class 
+        Each Contest instance contains:-
+            Code
+            Description of contest
+            Contest start time and End Time
+"""
 class Contest(Model):
     code = CharField(unique=True)
     description = CharField()
@@ -39,26 +52,47 @@ class Contest(Model):
     end_time = DateTimeField()
 
     class Meta:
+        #define the database in the main class
         database = db
 
-
+"""
+Question :Class
+        Each Question has a Question no and a author 
+        associated to it
+"""
 class Question(Model):
     q_no = IntegerField(unique=True)
     author = ForeignKeyField(User)
 
     class Meta:
+        #define the database in the main class
         database = db
 
+"""
+ContestProblems : Class
+    All contest problems belong to a Contest and are itself a question.
+        contest defines the instance of Contest Class it belongs
+        question defines the questions that belongs to that contest.
 
+"""
 class ContestProblems(Model):
     contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
 
     class Meta:
         database = db
+        #define the database in the main class
         indexes = ((("contest", "question"), True),)
 
-
+"""
+Submissision :class
+    Class defines the submission of solution of a Question
+    Stores the information about:
+        User that submits the Solution
+        Time of Submission
+        Contest to whish The question belongs
+        Whether the soolution is correct
+"""
 class Submission(Model):
     user = ForeignKeyField(User)
     time = DateTimeField()
@@ -67,6 +101,7 @@ class Submission(Model):
 
     class Meta:
         database = db
+        #define the database in the main class
         indexes = ((("user", "time"), True),)
 
 
