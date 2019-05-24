@@ -146,34 +146,16 @@ def dashboard():
 @app.get("/stats")
 @login_required
 def statistics():
-    sub_history = []
-    sub_stats_correct = []
-    sub_stats_total = []
     sub_history_temp = Submission.select(Contest.code, ContestProblems.question, Submission.time, Submission.is_correct)\
+        .where(Session.token == bottle.request.get_cookie("s_id"))\
         .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id)) \
         .join(Session, on=(Submission.user == Session.user))\
         .switch() \
         .join(Contest, on=(ContestProblems.contest == Contest.id)) \
         .order_by(Submission.time.desc())
-    for sub in sub_history_temp.tuples():
-        sub_history.append(sub)
-    sub_stats_correct_temp = (
-        Submission.select(
-            fn.count(Submission.is_correct)
-        )
-            .where((Submission.is_correct == True))
-            .join(Session, on=(Submission.user == Session.user))
-    )
-    for sub in sub_stats_correct_temp.tuples():
-        sub_stats_correct.append(sub)
-    sub_stats_total_temp = (
-        Submission.select(
-            fn.count(Submission.is_correct)
-        )
-            .join(Session, on=(Submission.user == Session.user))
-    )
-    for sub in sub_stats_total_temp.tuples():
-        sub_stats_total.append(sub)
+    sub_history = list(sub_history_temp.tuples())
+    sub_stats_total = len(sub_history)
+    sub_stats_correct = len([sub_history for sub in sub_history if sub[3]==True])
     return bottle.template("stats.html", sub_history=sub_history, sub_stats_correct=sub_stats_correct, sub_stats_total=sub_stats_total)
 
 @app.get("/contest/<code>/<number>")
