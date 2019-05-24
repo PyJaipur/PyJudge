@@ -147,7 +147,7 @@ def dashboard():
 @login_required
 def statistics():
     sub_history_temp = Submission.select(Contest.code, ContestProblems.question, Submission.time, Submission.is_correct)\
-        .where(Session.token == bottle.request.get_cookie("s_id"))\
+        .where(Submission.user == Session.get(Session.token == bottle.request.get_cookie("s_id")).user)\
         .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id)) \
         .join(Session, on=(Submission.user == Session.user))\
         .switch() \
