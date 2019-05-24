@@ -12,3 +12,4 @@ install:
 # command to run tests
 script:
     - pipenv run pytest -v --disable-pytest-warning
+    - pipenv run black --check ./
