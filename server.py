@@ -13,7 +13,7 @@ question_dir = "files/questions"
 db = SqliteDatabase(DATABASE_NAME)
 
 """
-User :Class
+Class: User 
       Defines username and password for individual user.
 """
 class User(Model):
@@ -28,7 +28,7 @@ class User(Model):
         database = db
         
 """
-Session :Class
+Class: Session
         Generates randam token for every section
         new Token is assigned to every User for every new session
 """  
@@ -43,7 +43,7 @@ class Session(Model):
         database = db
 
 """
-Contest :Class 
+Class: Contest
         Each Contest instance contains:-
             Code
             Description of contest
@@ -59,7 +59,7 @@ class Contest(Model):
         database = db
 
 """
-Question :Class
+Class: Question
         Each Question has a Question no and a author 
         associated to it
 """
@@ -71,7 +71,7 @@ class Question(Model):
         database = db
 
 """
-ContestProblems : Class
+Class: ContestProblems
     All contest problems belong to a Contest and are itself a question.
         contest defines the instance of Contest Class it belongs
         question defines the questions that belongs to that contest.
@@ -86,7 +86,7 @@ class ContestProblems(Model):
         indexes = ((("contest", "question"), True),)
 
 """
-Submissision :class
+Class: Submission
     Class defines the submission of solution of a Question
     Stores the information about:
         User that submits the Solution
@@ -159,14 +159,13 @@ ContestProblems.get_or_create(contest=ongoingContest[0], question=q4[0])
 ContestProblems.get_or_create(contest=futureContest[0], question=q5[0])
 ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
 
+
 """
-login_required: method /decorator function
+login_required: Function
         Extends the functainality of a funcion by checking log in condition.
         Checks if the user is logged in.if not redirect the user to home page 
         with message 'Login Required'
-    parameters : Function on which decorator is applied
-        
-        
+    parameters : Function on which decorator is applied  
 """
 def login_required(function):
     def login_redirect(*args, **kwargs):
@@ -178,7 +177,7 @@ def login_required(function):
 
 
 """
-changePath: method
+changePath: Function
     redirects to home page
 """
 @app.route("/")# Sets the url that trigger following function
@@ -187,7 +186,7 @@ def changePath():
 
 
 """
-home : method
+Function: home : Function
     redirects to Dashboard of the user
 """
 @app.get("/home")# Sets the base url as the argument.
@@ -197,7 +196,7 @@ def home():
     return bottle.template("home.html", message="")
 
 """
-changePath: method
+Function: changePath: Function
     redirects to Dashboard of the user
 """
 @app.get("/dashboard")# Sets the base url as the argument.
@@ -208,7 +207,7 @@ def dashboard():
 
 
 """
-question: method
+Function: question: Function
         Checks if the question and Contest it belongs does exists.
         If exists : it checks the current status of the contest
         And then returns the question state ment along with question numbers
@@ -240,9 +239,8 @@ def question(code, number):
     )
 
 
-
 """
-contest: method
+Function: contest: Function
         Checks if contest exists by validating the contest id.
         Checks the the current staus of code
     Parameters:
@@ -263,7 +261,7 @@ def contest(code):
 
 
 """
-download: method 
+Function: download 
         Downloads the question to local system
     Parameters:
         path :path to download from
@@ -276,7 +274,7 @@ def download(path):
 
 
 """
-server_static: method 
+Function: server_static
          Static files for server
     Parameters:
         path :path of file 
@@ -289,7 +287,7 @@ def server_static(filepath):
 
 
 """
-contest_ranking: method 
+Function: contest_ranking
         Generates rankinks of users in a Contest i.e the Contest results
         Validates the Sumbission And Contest 
         Checks the number of correct submissions for each user and Added to 
@@ -326,7 +324,7 @@ def contest_ranking(code):
 
 
 """
-rankings: method 
+Function: rankings 
         Overall Ranking of the user over all the Contest.
     Parameters:
         None
@@ -354,7 +352,7 @@ def rankings():
 
 
 """
-loggedIn: method 
+Function: loggedIn
         Downloads the question to local system
     Parameters:
         None
@@ -374,7 +372,7 @@ def logggedIn():
 
 
 """
-createSession: method 
+Function: createSession
         Create a session for the user
         Set up cookie for The current session with seesion id ,token and expiry 
         time
@@ -397,7 +395,7 @@ def createSession(username):
 
 
 """
-login: method 
+Function: login
         This function is called whenever user log in to the app
         Checks if the user entered the Right credentials for log in
     Parameters:
@@ -420,7 +418,7 @@ def login():
 
 
 """
-resgiter: method 
+Function: resgiter 
         This function is called whenever new user registers
         New User is Created in the Data base and his credentials are stored
         Checks if the user with same username already exisxts
@@ -443,7 +441,7 @@ def register():
 
 
 """
-logout: method 
+Function: logout
         Ends the session for the user 
         Deletes the session cookie
         
@@ -460,16 +458,14 @@ def logout():
 
 
 """
-file_upload: method 
-       This method is used to upload the submission to  Question to the Server.
+Function: file_upload 
+       This Function is used to upload the submission to  Question to the Server.
     Parameters:
         code: Contest Code 
         number : Question No of ehich solution is uploaded
     Return :
         "Wrong Answer!! : If solution is wrong
-        "Solved! Great Job! " : If solution is correct
-        
-        
+        "Solved! Great Job! " : If solution is correct    
 """
 @app.post("/check/<code>/<number>")
 @login_required 
@@ -504,7 +500,7 @@ def file_upload(code, number):
 
 
 """
-error404: method 
+Function: error404 
         Handles Error  
     Parameter:
         error : Error rturned the App
