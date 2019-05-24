@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("PythonClass:Contest","Contest");NDSummary.OnSummaryLoaded("PythonClass:Contest",[["Python","Python"]],[["Classes","Class"]],[[3,0,0,"Contest"]]);

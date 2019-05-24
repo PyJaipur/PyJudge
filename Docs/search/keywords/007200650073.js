@@ -1,0 +1,1 @@
+NDSearch.OnPrefixDataLoaded("res",["Function"],[["resgiter",,[["Submission",,,,0,"File:server.py:Submission.resgiter","PythonClass:Submission:resgiter"]]]]);

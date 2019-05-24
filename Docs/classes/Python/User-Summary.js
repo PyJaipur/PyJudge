@@ -1,0 +1,1 @@
+NDFramePage.OnPageTitleLoaded("PythonClass:User","User");NDSummary.OnSummaryLoaded("PythonClass:User",[["Python","Python"]],[["Classes","Class"]],[[1,0,0,"User"]]);

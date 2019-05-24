@@ -1,0 +1,1 @@
+NDSummary.OnToolTipsLoaded("PythonClass:User",{1:"<div class=\"NDToolTip TClass LPython\"><div class=\"NDClassPrototype\" id=\"NDClassPrototype1\"><div class=\"CPEntry TClass Current\"><div class=\"CPName\">User</div></div></div><div class=\"TTSummary\">Defines username and password for individual user.</div></div>"});
