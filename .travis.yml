@@ -4,10 +4,11 @@ python:
     - "3.7-dev"
 
 # command to install dependencies
-#install: "make"
+install:
+    - pip3 install pipenv
+    - pipenv install --dev
+    
 
 # command to run tests
 script:
-    - pip3 install pipenv
-    - pipenv install --dev
     - pipenv run pytest -v --disable-pytest-warning
