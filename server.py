@@ -105,8 +105,10 @@ class Submission(Model):
         indexes = ((("user", "time"), True),)
 
 
-db.connect()
-db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
+db.connect()# Establish a Connection with Database
+
+db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])# Create Tables with 
+#specied fields in Databse
 
 
 # dummy contest data
@@ -135,8 +137,10 @@ futureContest = Contest.get_or_create(
     end_time=datetime.datetime(day=1, month=10, year=2020),
 )
 
+# Create a test User
 test = User.get_or_create(username="test", password="test")
 
+# Create test Questions
 q1 = Question.get_or_create(q_no=1, author=test[0])
 q2 = Question.get_or_create(q_no=2, author=test[0])
 q3 = Question.get_or_create(q_no=3, author=test[0])
@@ -144,6 +148,8 @@ q4 = Question.get_or_create(q_no=4, author=test[0])
 q5 = Question.get_or_create(q_no=5, author=test[0])
 q6 = Question.get_or_create(q_no=6, author=test[0])
 
+# Add Questions to contest 
+# Contest Problem Instance is created which is used to assign question to specific contests.
 ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
 ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
 ContestProblems.get_or_create(contest=pastContest[0], question=q1[0])
@@ -153,7 +159,15 @@ ContestProblems.get_or_create(contest=ongoingContest[0], question=q4[0])
 ContestProblems.get_or_create(contest=futureContest[0], question=q5[0])
 ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
 
-
+"""
+login_required: method /decorator function
+        Extends the functainality of a funcion by checking log in condition.
+        Checks if the user is logged in.if not redirect the user to home page 
+        with message 'Login Required'
+    parameters : Function on which decorator is applied
+        
+        
+"""
 def login_required(function):
     def login_redirect(*args, **kwargs):
         if not logggedIn():
@@ -163,27 +177,50 @@ def login_required(function):
     return login_redirect
 
 
-@app.route("/")
+"""
+changePath: method
+    redirects to home page
+"""
+@app.route("/")# Sets the url that trigger following function
 def changePath():
     return bottle.redirect("/home")
 
 
-@app.get("/home")
-def home():
+"""
+home : method
+    redirects to Dashboard of the user
+"""
+@app.get("/home")# Sets the base url as the argument.
+def home():    
     if logggedIn():
         return bottle.redirect("/dashboard")
     return bottle.template("home.html", message="")
 
-
-@app.get("/dashboard")
-@login_required
+"""
+changePath: method
+    redirects to Dashboard of the user
+"""
+@app.get("/dashboard")# Sets the base url as the argument.
+@login_required# Checks if user is logged in or not
 def dashboard():
     contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
 
-@app.get("/contest/<code>/<number>")
-@login_required
+"""
+question: method
+        Checks if the question and Contest it belongs does exists.
+        If exists : it checks the current status of the contest
+        And then returns the question state ment along with question numbers
+        and contest code to the Template
+    Parameters:
+        code: Contest Code
+        number: Question Number
+    Return: 
+        Question Template
+"""
+@app.get("/contest/<code>/<number>")# Sets the base url as the argument.
+@login_required# Checks if user is logged in or not
 def question(code, number):
     if (
         not ContestProblems.select()
@@ -203,6 +240,16 @@ def question(code, number):
     )
 
 
+
+"""
+contest: method
+        Checks if contest exists by validating the contest id.
+        Checks the the current staus of code
+    Parameters:
+        code : contest code
+    Return :
+        Contest Template
+"""
 @app.get("/contest/<code>")
 @login_required
 def contest(code):
@@ -215,16 +262,46 @@ def contest(code):
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
+"""
+download: method 
+        Downloads the question to local system
+    Parameters:
+        path :path to download from
+    Return :
+        Static Files: Downloadable Files
+"""
 @app.get("/question/<path:path>")
 def download(path):
     return bottle.static_file(path, root=question_dir)
 
 
+"""
+server_static: method 
+         Static files for server
+    Parameters:
+        path :path of file 
+    Return :
+        Static Files
+"""
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
     return bottle.static_file(filepath, root=os.path.join(dir_path, "static"))
 
 
+"""
+contest_ranking: method 
+        Generates rankinks of users in a Contest i.e the Contest results
+        Validates the Sumbission And Contest 
+        Checks the number of correct submissions for each user and Added to 
+        list with tuples of Username Along with thier Scores . The tuples 
+        are added to list in descending order of the score .Then rankings are 
+        given to each Username in the list.
+        
+    Parameters:
+        code : contest code
+    Return :
+        Ranking Template with ranks of different user in  a contest.
+"""
 @app.get("/ranking/<code>")
 def contest_ranking(code):
     order = (
@@ -239,15 +316,23 @@ def contest_ranking(code):
         .switch()
         .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id))
         .group_by(Submission.user)
-        .order_by(fn.count(Submission.contestProblem.distinct()).desc())
+        .order_by(fn.count(Submission.contestProblem.distinct()).desc())# descending order on basis of no of solution
     )
     order = list(order.tuples())
     order = [
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
-    ]
+    ]# associate  ranks to each user
     return bottle.template("rankings.html", people=order)
 
 
+"""
+rankings: method 
+        Overall Ranking of the user over all the Contest.
+    Parameters:
+        None
+    Return :
+        Ranking Template with Overall Ranking
+"""
 @app.get("/ranking")
 def rankings():
     order = (
@@ -267,6 +352,17 @@ def rankings():
     ]
     return bottle.template("rankings.html", people=order)
 
+
+"""
+loggedIn: method 
+        Downloads the question to local system
+    Parameters:
+        None
+    Return :
+        True: if Session exixsts for the user Logged In
+        False: if Session not exixst for the user Logged In
+            or if the s_id is not present or is wrong
+"""
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
         return False
@@ -277,6 +373,16 @@ def logggedIn():
     )
 
 
+"""
+createSession: method 
+        Create a session for the user
+        Set up cookie for The current session with seesion id ,token and expiry 
+        time
+    Parameters:
+        username: Username of user For whom session is Created.
+    Return :
+        Redirects to user Dashoard
+"""
 def createSession(username):
     try:
         session = Session.create(user=User.get(User.username == username))
@@ -290,6 +396,16 @@ def createSession(username):
     return bottle.redirect("/dashboard")
 
 
+"""
+login: method 
+        This function is called whenever user log in to the app
+        Checks if the user entered the Right credentials for log in
+    Parameters:
+        None
+    Return :
+        Redirects to home if invalid credenial
+        Else Creates the session for the user  
+"""
 @app.post("/login")
 def login():
     username = bottle.request.forms.get("username")
@@ -303,6 +419,16 @@ def login():
     return createSession(username)
 
 
+"""
+resgiter: method 
+        This function is called whenever new user registers
+        New User is Created in the Data base and his credentials are stored
+        Checks if the user with same username already exisxts
+    Parameters:
+        None
+    Return :
+        Creates session for new user.
+"""
 @app.post("/register")
 def register():
     username = bottle.request.forms.get("username")
@@ -316,6 +442,16 @@ def register():
     return createSession(username)
 
 
+"""
+logout: method 
+        Ends the session for the user 
+        Deletes the session cookie
+        
+    Parameters:
+        None
+    Return :
+        Redirects to Home Page
+"""
 @app.get("/logout")
 def logout():
     Session.delete().where(Session.token == bottle.request.get_cookie("s_id")).execute()
@@ -323,37 +459,63 @@ def logout():
     return bottle.redirect("/home")
 
 
-@app.post("/check/<code>/<number>")
-@login_required
+"""
+file_upload: method 
+       This method is used to upload the submission to  Question to the Server.
+    Parameters:
+        code: Contest Code 
+        number : Question No of ehich solution is uploaded
+    Return :
+        "Wrong Answer!! : If solution is wrong
+        "Solved! Great Job! " : If solution is correct
+        
+        
+"""
+@app.post("/check/<code>/<number>") # Send Date to url given as argument
+@login_required # checks if user is Logged In
 def file_upload(code, number):
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
             ContestProblems.question == Question.get(Question.q_no == int(number)),
-        )
+        )# checks if Contest Problem Exists
     except:
         return bottle.abort(404, "no such contest problem")
+    # get the user details
     user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
+    # time of submisision
     time = datetime.datetime.now()
-    uploaded = bottle.request.files.get("upload").file.read()
+   
+    uploaded = bottle.request.files.get("upload").file.read() # read the uploaded File
     with open(os.path.join(question_dir, number, "output.txt"), "rb") as fl:
         expected = fl.read()
     expected = expected.strip()
     uploaded = uploaded.strip()
-    ans = uploaded == expected
+    ans = uploaded == expected #Answer is correct if uploaded is same as expected.
+    
     try:
         Submission.create(
             user=user, contestProblem=contestProblem, time=time, is_correct=ans
-        )
+        )# Add Submission For User
     except:
         bottle.abort(500, "Error in inserting submission to database.")
-    if not ans:
+    
+    if not ans: # if Answer is Wrong
         return "Wrong Answer!!"
     else:
         return "Solved! Great Job! "
 
 
-@app.error(404)
+"""
+error404: method 
+        Handles Error  
+    Parameter:
+        error : Error rturned the App
+    Return :
+        Redirects to 
+        
+"""
+@app.error(404) # Checks if app returns an error with error code as argument
 def error404(error):
     return template("error.html", errorcode=error.status_code, errorbody=error.body)
 
