@@ -161,7 +161,7 @@ ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
 
 
 """
-login_required: Function
+Function: login_required
         Extends the functainality of a funcion by checking log in condition.
         Checks if the user is logged in.if not redirect the user to home page 
         with message 'Login Required'
@@ -177,7 +177,7 @@ def login_required(function):
 
 
 """
-changePath: Function
+Function: changePath
     redirects to home page
 """
 @app.route("/")# Sets the url that trigger following function
@@ -186,7 +186,7 @@ def changePath():
 
 
 """
-Function: home : Function
+Function: home
     redirects to Dashboard of the user
 """
 @app.get("/home")# Sets the base url as the argument.
@@ -196,7 +196,7 @@ def home():
     return bottle.template("home.html", message="")
 
 """
-Function: changePath: Function
+Function: dashboard
     redirects to Dashboard of the user
 """
 @app.get("/dashboard")# Sets the base url as the argument.
@@ -207,7 +207,7 @@ def dashboard():
 
 
 """
-Function: question: Function
+Function: question
         Checks if the question and Contest it belongs does exists.
         If exists : it checks the current status of the contest
         And then returns the question state ment along with question numbers
