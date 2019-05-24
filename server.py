@@ -232,6 +232,7 @@ def rankings():
     ]
     return bottle.template("rankings.html", people=order)
 
+
 def logggedIn():
     if not bottle.request.get_cookie("s_id"):
         return False
@@ -321,6 +322,7 @@ def file_upload(code, number):
 @app.error(404)
 def error404(error):
     return template("error.html", errorcode=error.status_code, errorbody=error.body)
+
 
 if __name__ == "__main__":
     bottle.run(app, host="localhost", port=8080)
