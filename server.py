@@ -21,6 +21,10 @@ class User(Model):
     password = CharField()
 
     class Meta:
+        """
+        Class : Meta
+            define the database in the main class
+        """
         database = db
         
 """
@@ -52,7 +56,6 @@ class Contest(Model):
     end_time = DateTimeField()
 
     class Meta:
-        #define the database in the main class
         database = db
 
 """
@@ -65,7 +68,6 @@ class Question(Model):
     author = ForeignKeyField(User)
 
     class Meta:
-        #define the database in the main class
         database = db
 
 """
@@ -81,7 +83,6 @@ class ContestProblems(Model):
 
     class Meta:
         database = db
-        #define the database in the main class
         indexes = ((("contest", "question"), True),)
 
 """
@@ -104,12 +105,11 @@ class Submission(Model):
         #define the database in the main class
         indexes = ((("user", "time"), True),)
 
+#Establish a Connection with Database
+db.connect()
 
-db.connect()# Establish a Connection with Database
-
-db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])# Create Tables with 
-#specied fields in Databse
-
+"""Create Tables with specied fields in Databse"""
+db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
 
 # dummy contest data
 practiceContest = Contest.get_or_create(
@@ -149,7 +149,7 @@ q5 = Question.get_or_create(q_no=5, author=test[0])
 q6 = Question.get_or_create(q_no=6, author=test[0])
 
 # Add Questions to contest 
-# Contest Problem Instance is created which is used to assign question to specific contests.
+"""Contest Problem Instance is created which is used to assign question to specific contests."""
 ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
 ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
 ContestProblems.get_or_create(contest=pastContest[0], question=q1[0])
@@ -219,8 +219,8 @@ question: method
     Return: 
         Question Template
 """
-@app.get("/contest/<code>/<number>")# Sets the base url as the argument.
-@login_required# Checks if user is logged in or not
+@app.get("/contest/<code>/<number>")
+@login_required
 def question(code, number):
     if (
         not ContestProblems.select()
@@ -471,27 +471,24 @@ file_upload: method
         
         
 """
-@app.post("/check/<code>/<number>") # Send Date to url given as argument
-@login_required # checks if user is Logged In
+@app.post("/check/<code>/<number>")
+@login_required 
 def file_upload(code, number):
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
             ContestProblems.question == Question.get(Question.q_no == int(number)),
-        )# checks if Contest Problem Exists
+        )
     except:
         return bottle.abort(404, "no such contest problem")
-    # get the user details
     user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
-    # time of submisision
     time = datetime.datetime.now()
-   
     uploaded = bottle.request.files.get("upload").file.read() # read the uploaded File
     with open(os.path.join(question_dir, number, "output.txt"), "rb") as fl:
         expected = fl.read()
     expected = expected.strip()
     uploaded = uploaded.strip()
-    ans = uploaded == expected #Answer is correct if uploaded is same as expected.
+    ans = uploaded == expected
     
     try:
         Submission.create(
