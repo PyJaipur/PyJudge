@@ -25,10 +25,10 @@
 				</tr>
 				% for sub_history in sub_history :
 				<tr>
-					<td style="padding-right:10rem">{{sub_history[0]}}</td>
-					<td style="padding-right:6rem">{{sub_history[1]}}</td>
-					<td style="padding-right:8rem">{{sub_history[2].strftime("%d-%m-%Y %H:%M")}}</td>
-					<td style="padding-right:10rem">{{sub_history[3]}}</td>
+					<td style="padding-right:10rem">{{sub_history["code"]}}</td>
+					<td style="padding-right:6rem">{{sub_history["question"]}}</td>
+					<td style="padding-right:8rem">{{sub_history["time"].strftime("%d-%m-%Y %H:%M")}}</td>
+					<td style="padding-right:10rem">{{sub_history["is_correct"]}}</td>
 				</tr>
 				% end
 			</tbody>

@@ -120,6 +120,8 @@ def login_required(function):
     def login_redirect(*args, **kwargs):
         if not logggedIn():
             return bottle.template("home.html", message="Login required.")
+        me = Session.get(Session.token == bottle.request.get_cookie('s_id'))
+        bottle.request.session = me
         return function(*args, **kwargs)
 
     return login_redirect
@@ -146,16 +148,15 @@ def dashboard():
 @app.get("/stats")
 @login_required
 def statistics():
-    sub_history_temp = Submission.select(Contest.code, ContestProblems.question, Submission.time, Submission.is_correct)\
-        .where(Submission.user == Session.get(Session.token == bottle.request.get_cookie("s_id")).user)\
+    sub_history = Submission.select(Contest.code, ContestProblems.question, Submission.time, Submission.is_correct)\
+        .where(Submission.user == bottle.request.session.user)\
         .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id)) \
-        .join(Session, on=(Submission.user == Session.user))\
         .switch() \
         .join(Contest, on=(ContestProblems.contest == Contest.id)) \
-        .order_by(Submission.time.desc())
-    sub_history = list(sub_history_temp.tuples())
+        .order_by(Submission.time.desc()) \
+        .dicts()
     sub_stats_total = len(sub_history)
-    sub_stats_correct = len([sub_history for sub in sub_history if sub[3]==True])
+    sub_stats_correct = len([sub_history for sub in sub_history if sub["is_correct"]])
     return bottle.template("stats.html", sub_history=sub_history, sub_stats_correct=sub_stats_correct, sub_stats_total=sub_stats_total)
 
 @app.get("/contest/<code>/<number>")
