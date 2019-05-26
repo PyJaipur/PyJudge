@@ -50,6 +50,17 @@ class Question(Model):
         database = db
 
 
+class UploadedQuestion(Model):
+    question_text = TextField()
+    answer_text = TextField()
+    statement_text = CharField()
+    author = ForeignKeyField(User)
+    created_date_time = DateTimeField()
+
+    class Meta:
+        database = db
+
+
 class ContestProblems(Model):
     contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
@@ -71,7 +82,9 @@ class Submission(Model):
 
 
 db.connect()
-db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
+db.create_tables(
+    [User, Session, Submission, ContestProblems, Contest, Question, UploadedQuestion]
+)
 
 # dummy contest data
 practiceContest = Contest.get_or_create(
@@ -173,6 +186,61 @@ def statistics():
         sub_stats_correct=sub_stats_correct,
         sub_stats_total=sub_stats_total,
     )
+
+
+@app.get("/addQuestion")
+@login_required
+def addQuestion():
+    return bottle.template("addQuestion.html")
+
+
+@app.post("/questionInput")
+@login_required
+def questionInput():
+    userid = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
+    time = datetime.datetime.now()
+    uploaded_question = bottle.request.files.get("question").file.read()
+    uploaded_answer = bottle.request.files.get("answer").file.read()
+    uploaded_statement = bottle.request.forms.get("statement")
+    try:
+        UploadedQuestion.create(
+            question_text=uploaded_question,
+            answer_text=uploaded_answer,
+            statement_text=uploaded_statement,
+            author=userid,
+            created_date_time=time,
+        )
+    except:
+        bottle.abort(500, "Error in inserting submission to database.")
+    question_bank = (
+        UploadedQuestion.select(
+            UploadedQuestion.id,
+            UploadedQuestion.question_text,
+            UploadedQuestion.statement_text,
+            User.username,
+            UploadedQuestion.created_date_time,
+        )
+        .join(User, on=(UploadedQuestion.author == User.id))
+        .order_by(UploadedQuestion.created_date_time.desc())
+        .dicts()
+    )
+    return bottle.template("questionBank.html", question_bank=question_bank)
+
+
+@app.get("/display/<id>")
+@app.post("/display/<id>")
+@login_required
+def displayQuestion(id):
+    try:
+        question_result = (
+            UploadedQuestion.select(UploadedQuestion.question_text)
+            .where(UploadedQuestion.id == id)
+            .dicts()
+            .get()
+        )
+        return question_result["question_text"]
+    except:
+        bottle.abort(404, "No such question")
 
 
 @app.get("/contest/<code>/<number>")
