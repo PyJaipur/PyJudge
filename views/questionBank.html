@@ -23,11 +23,11 @@
 				% for question in question_bank :
 				<tr>
 					<td style="padding-right:10rem">
-						<a href="/display/{{question['id']}}" role="button" class="btn btn-primary">
+						<a href="/question/{{question['id']}}" role="button" class="btn btn-primary">
 						Download Question
 						</a>	
 					</td>
-					<td style="padding-right:10rem">{{question["statement_text"]}}</td>
+					<td style="padding-right:10rem">{{question["question_statement"]}}</td>
 					<td style="padding-right:10rem">{{question["username"]}}</td>
 					<td style="padding-right:8rem">{{question["created_date_time"].strftime("%d-%m-%Y %H:%M")}}</td>
 				</tr>

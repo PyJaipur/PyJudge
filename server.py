@@ -2,6 +2,7 @@ import bottle
 import os, sys, datetime
 import string, random
 from peewee import *
+import logging
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
@@ -43,17 +44,9 @@ class Contest(Model):
 
 
 class Question(Model):
-    q_no = IntegerField(unique=True)
-    author = ForeignKeyField(User)
-
-    class Meta:
-        database = db
-
-
-class UploadedQuestion(Model):
-    question_text = TextField()
-    answer_text = TextField()
-    statement_text = CharField()
+    test_case_input = TextField()
+    test_case_output = TextField()
+    question_statement = CharField()
     author = ForeignKeyField(User)
     created_date_time = DateTimeField()
 
@@ -83,7 +76,7 @@ class Submission(Model):
 
 db.connect()
 db.create_tables(
-    [User, Session, Submission, ContestProblems, Contest, Question, UploadedQuestion]
+    [User, Session, Submission, ContestProblems, Contest, Question]
 )
 
 # dummy contest data
@@ -114,13 +107,13 @@ futureContest = Contest.get_or_create(
 
 test = User.get_or_create(username="test", password="test")
 
-q1 = Question.get_or_create(q_no=1, author=test[0])
-q2 = Question.get_or_create(q_no=2, author=test[0])
-q3 = Question.get_or_create(q_no=3, author=test[0])
-q4 = Question.get_or_create(q_no=4, author=test[0])
-q5 = Question.get_or_create(q_no=5, author=test[0])
-q6 = Question.get_or_create(q_no=6, author=test[0])
-
+q1 = Question.get_or_create(test_case_input="1", test_case_output="1", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+q2 = Question.get_or_create(test_case_input="2", test_case_output="2", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+q3 = Question.get_or_create(test_case_input="3", test_case_output="3", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+q4 = Question.get_or_create(test_case_input="4", test_case_output="4", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+q5 = Question.get_or_create(test_case_input="5", test_case_output="5", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+q6 = Question.get_or_create(test_case_input="6", test_case_output="6", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
+logging.getLogger().setLevel(logging.INFO)
 ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
 ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
 ContestProblems.get_or_create(contest=pastContest[0], question=q1[0])
@@ -203,44 +196,28 @@ def questionInput():
     uploaded_answer = bottle.request.files.get("answer").file.read()
     uploaded_statement = bottle.request.forms.get("statement")
     try:
-        UploadedQuestion.create(
-            question_text=uploaded_question,
-            answer_text=uploaded_answer,
-            statement_text=uploaded_statement,
+        Question.create(
+            test_case_input=uploaded_question,
+            test_case_output=uploaded_answer,
+            question_statement=uploaded_statement,
             author=userid,
             created_date_time=time,
         )
     except:
         bottle.abort(500, "Error in inserting submission to database.")
     question_bank = (
-        UploadedQuestion.select(
-            UploadedQuestion.id,
-            UploadedQuestion.question_text,
-            UploadedQuestion.statement_text,
+        Question.select(
+            Question.id,
+            Question.test_case_input,
+            Question.question_statement,
             User.username,
-            UploadedQuestion.created_date_time,
+            Question.created_date_time,
         )
-        .join(User, on=(UploadedQuestion.author == User.id))
-        .order_by(UploadedQuestion.created_date_time.desc())
+        .join(User, on=(Question.author == User.id))
+        .order_by(Question.created_date_time.desc())
         .dicts()
     )
     return bottle.template("questionBank.html", question_bank=question_bank)
-
-
-@app.get("/display/<id>")
-@app.post("/display/<id>")
-@login_required
-def displayQuestion(id):
-    try:
-        question_result = (
-            UploadedQuestion.select(UploadedQuestion.question_text)
-            .where(UploadedQuestion.id == id)
-            .dicts()
-            .get()
-        )
-        return question_result["question_text"]
-    except:
-        bottle.abort(404, "No such question")
 
 
 @app.get("/contest/<code>/<number>")
@@ -248,17 +225,21 @@ def displayQuestion(id):
 def question(code, number):
     if (
         not ContestProblems.select()
-        .where((Contest.code == code) & (Question.q_no == int(number)))
+        .where((Contest.code == code) & (Question.id == int(number)))
         .join(Contest, on=(ContestProblems.contest == Contest.id))
-        .join(Question, on=(ContestProblems.question == Question.q_no))
+        .join(Question, on=(ContestProblems.question == Question.id))
         .exists()
     ):
         return bottle.abort(404, "no such contest problem")
     contest = Contest.get(Contest.code == code)
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
-    with open(os.path.join(question_dir, number, "statement.txt"), "rb") as fl:
-        statement = fl.read()
+    statement = (
+            Question.select(Question.question_statement)
+            .where(Question.id == number)
+            .dicts()
+            .get()
+        )
     return bottle.template(
         "question.html", question_number=number, contest=code, question=statement
     )
@@ -273,12 +254,22 @@ def contest(code):
         return bottle.abort(404, "no such contest")
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
+    logging.info(contest.questions.get())
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
-@app.get("/question/<path:path>")
-def download(path):
-    return bottle.static_file(path, root=question_dir)
+@app.get("/question/<id>")
+def download(id):
+    try:
+        question_result = (
+            Question.select(Question.test_case_input)
+            .where(Question.id == id)
+            .dicts()
+            .get()
+        )
+        return question_result["test_case_input"]
+    except:
+        bottle.abort(404, "No such question")
 
 
 @app.get("/static/<filepath:path>")
@@ -391,16 +382,20 @@ def file_upload(code, number):
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
-            ContestProblems.question == Question.get(Question.q_no == int(number)),
+            ContestProblems.question == Question.get(Question.id == int(number)),
         )
     except:
         return bottle.abort(404, "no such contest problem")
     user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
-    with open(os.path.join(question_dir, number, "output.txt"), "rb") as fl:
-        expected = fl.read()
-    expected = expected.strip()
+    expected = (
+            Question.select(Question.test_case_output)
+            .where(Question.id == number)
+            .dicts()
+            .get()
+        )
+    expected = expected["test_case_output"]
     uploaded = uploaded.strip()
     ans = uploaded == expected
     try:
