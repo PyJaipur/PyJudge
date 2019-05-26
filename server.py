@@ -2,7 +2,6 @@ import bottle
 import os, sys, datetime
 import string, random
 from peewee import *
-import logging
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
@@ -48,7 +47,7 @@ class Question(Model):
     test_case_output = TextField()
     question_statement = CharField()
     author = ForeignKeyField(User)
-    created_date_time = DateTimeField()
+    created_date_time = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         database = db
@@ -75,53 +74,7 @@ class Submission(Model):
 
 
 db.connect()
-db.create_tables(
-    [User, Session, Submission, ContestProblems, Contest, Question]
-)
-
-# dummy contest data
-practiceContest = Contest.get_or_create(
-    code="PRACTICE",
-    description="practice questions",
-    start_time=datetime.datetime(day=1, month=1, year=1),
-    end_time=datetime.datetime(day=1, month=1, year=9999),
-)
-pastContest = Contest.get_or_create(
-    code="PASTCONTEST",
-    description="somewhere in the past",
-    start_time=datetime.datetime(day=1, month=11, year=2018),
-    end_time=datetime.datetime(day=1, month=12, year=2018),
-)
-ongoingContest = Contest.get_or_create(
-    code="ONGOINGCONTEST",
-    description="somewhere in the present",
-    start_time=datetime.datetime(day=1, month=4, year=2019),
-    end_time=datetime.datetime(day=1, month=6, year=2019),
-)
-futureContest = Contest.get_or_create(
-    code="FUTURECONTEST",
-    description="somewhere in the future",
-    start_time=datetime.datetime(day=1, month=1, year=2020),
-    end_time=datetime.datetime(day=1, month=10, year=2020),
-)
-
-test = User.get_or_create(username="test", password="test")
-
-q1 = Question.get_or_create(test_case_input="1", test_case_output="1", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-q2 = Question.get_or_create(test_case_input="2", test_case_output="2", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-q3 = Question.get_or_create(test_case_input="3", test_case_output="3", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-q4 = Question.get_or_create(test_case_input="4", test_case_output="4", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-q5 = Question.get_or_create(test_case_input="5", test_case_output="5", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-q6 = Question.get_or_create(test_case_input="6", test_case_output="6", question_statement="1", author=test[0], created_date_time=datetime.datetime.now())
-logging.getLogger().setLevel(logging.INFO)
-ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
-ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
-ContestProblems.get_or_create(contest=pastContest[0], question=q1[0])
-ContestProblems.get_or_create(contest=pastContest[0], question=q2[0])
-ContestProblems.get_or_create(contest=ongoingContest[0], question=q3[0])
-ContestProblems.get_or_create(contest=ongoingContest[0], question=q4[0])
-ContestProblems.get_or_create(contest=futureContest[0], question=q5[0])
-ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
+db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
 
 
 def login_required(function):
@@ -190,8 +143,7 @@ def addQuestion():
 @app.post("/questionInput")
 @login_required
 def questionInput():
-    userid = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
-    time = datetime.datetime.now()
+    userid = bottle.request.session.user
     uploaded_question = bottle.request.files.get("question").file.read()
     uploaded_answer = bottle.request.files.get("answer").file.read()
     uploaded_statement = bottle.request.forms.get("statement")
@@ -201,10 +153,9 @@ def questionInput():
             test_case_output=uploaded_answer,
             question_statement=uploaded_statement,
             author=userid,
-            created_date_time=time,
         )
-    except:
-        bottle.abort(500, "Error in inserting submission to database.")
+    except Exception as e:
+        bottle.abort(500, str(e))
     question_bank = (
         Question.select(
             Question.id,
@@ -235,11 +186,11 @@ def question(code, number):
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
     statement = (
-            Question.select(Question.question_statement)
-            .where(Question.id == number)
-            .dicts()
-            .get()
-        )
+        Question.select(Question.question_statement)
+        .where(Question.id == number)
+        .dicts()
+        .get()
+    )
     return bottle.template(
         "question.html", question_number=number, contest=code, question=statement
     )
@@ -254,7 +205,6 @@ def contest(code):
         return bottle.abort(404, "no such contest")
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
-    logging.info(contest.questions.get())
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
@@ -267,9 +217,9 @@ def download(id):
             .dicts()
             .get()
         )
-        return question_result["test_case_input"]
     except:
         bottle.abort(404, "No such question")
+    return question_result["test_case_input"]
 
 
 @app.get("/static/<filepath:path>")
@@ -390,11 +340,11 @@ def file_upload(code, number):
     time = datetime.datetime.now()
     uploaded = bottle.request.files.get("upload").file.read()
     expected = (
-            Question.select(Question.test_case_output)
-            .where(Question.id == number)
-            .dicts()
-            .get()
-        )
+        Question.select(Question.test_case_output)
+        .where(Question.id == number)
+        .dicts()
+        .get()
+    )
     expected = expected["test_case_output"]
     uploaded = uploaded.strip()
     ans = uploaded == expected
@@ -402,8 +352,8 @@ def file_upload(code, number):
         Submission.create(
             user=user, contestProblem=contestProblem, time=time, is_correct=ans
         )
-    except:
-        bottle.abort(500, "Error in inserting submission to database.")
+    except Exception as e:
+        bottle.abort(500, str(e))
     if not ans:
         return "Wrong Answer!!"
     else:
