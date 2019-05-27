@@ -1,1 +1,0 @@
-NDSearch.OnPrefixDataLoaded("ran",["Function"],[["rankings",,[["Submission",,,,0,"File:server.py:Submission.rankings","PythonClass:Submission:rankings"]]]]);

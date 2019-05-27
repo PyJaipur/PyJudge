@@ -1,1 +1,0 @@
-NDMenu.OnSectionLoaded("classes.js",[[1,"Contest"],[1,"ContestProblems"],[1,"Question"],[1,"Session"],[1,"Submission"],[1,"User"]]);

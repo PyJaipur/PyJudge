@@ -1,1 +1,0 @@
-NDSummary.OnToolTipsLoaded("PythonClass:Contest",{3:"<div class=\"NDToolTip TClass LPython\"><div class=\"NDClassPrototype\" id=\"NDClassPrototype3\"><div class=\"CPEntry TClass Current\"><div class=\"CPName\">Contest</div></div></div><div class=\"TTSummary\">Each Contest instance contains:- Code Description of contest Contest start time and End Time</div></div>"});

@@ -1,1 +1,0 @@
-NDSearch.OnPrefixDataLoaded("das",["Function"],[["dashboard",,[["Submission",,,,0,"File:server.py:Submission.dashboard","PythonClass:Submission:dashboard"]]]]);

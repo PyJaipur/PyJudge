@@ -1,1 +1,0 @@
-NDSummary.OnToolTipsLoaded("PythonClass:Session",{2:"<div class=\"NDToolTip TClass LPython\"><div class=\"NDClassPrototype\" id=\"NDClassPrototype2\"><div class=\"CPEntry TClass Current\"><div class=\"CPName\">Session</div></div></div><div class=\"TTSummary\">Generates randam token for every section new Token is assigned to every User for every new session</div></div>"});

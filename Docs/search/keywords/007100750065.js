@@ -1,1 +1,0 @@
-NDSearch.OnPrefixDataLoaded("que",["Class","Function"],[["Question",,[[,,,,0,"File:server.py:Question","PythonClass:Question"],["Submission","question",,,1,"File:server.py:Submission.question","PythonClass:Submission:question"]]]]);

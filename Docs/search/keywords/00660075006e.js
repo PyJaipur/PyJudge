@@ -1,1 +1,0 @@
-NDSearch.OnPrefixDataLoaded("fun",["Function"],[["Function",,[["Submission","contest: Function",,"contest:function",0,"File:server.py:Submission.contest_Function","PythonClass:Submission:contest_Function"]]]]);
