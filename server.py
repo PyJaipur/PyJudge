@@ -37,6 +37,8 @@ class Contest(Model):
     description = CharField()
     start_time = DateTimeField()
     end_time = DateTimeField()
+    creator = ForeignKeyField(User)
+    created_date_time = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         database = db
@@ -169,6 +171,49 @@ def questionInput():
         .dicts()
     )
     return bottle.template("questionBank.html", question_bank=question_bank)
+
+
+@app.get("/addContest")
+@login_required
+def addContest():
+    question_bank = (
+        Question.select(
+            Question.id,
+            Question.test_case_input,
+            Question.question_statement,
+            User.username,
+            Question.created_date_time,
+        )
+        .join(User, on=(Question.author == User.id))
+        .order_by(Question.created_date_time.desc())
+        .dicts()
+    )
+    return bottle.template("addContest.html", question_bank=question_bank)
+
+
+@app.post("/contestInput")
+@login_required
+def contestInput():
+    userid = bottle.request.session.user
+    code = bottle.request.forms.get("code")
+    description = bottle.request.forms.get("description")
+    start_time = bottle.request.forms.get("start_time")
+    end_time = bottle.request.forms.get("end_time")
+    selection = bottle.request.forms.getall("selection")
+    try:
+        contest = Contest.get_or_create(
+            code=code,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
+            creator=userid,
+        )
+    except Exception as e:
+        bottle.abort(500, str(e))
+    for questions in selection:
+        ContestProblems.create(contest=contest[0], question=questions)
+    contests = Contest.select().order_by(Contest.start_time)
+    return bottle.template("dashboard.html", contests=contests)
 
 
 @app.get("/contest/<code>/<number>")
