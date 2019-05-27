@@ -1,0 +1,84 @@
+% include('base.html', title="User Statistics")
+<body>
+	<div class="container text-center">
+		<div>
+			<h1>User Statistics</h1>
+		</div>
+		<div class="container" style="height:3rem;">
+			<a href="/dashboard" class="btn btn-primary">Dashboard</a>
+			<a href="/logout" class="btn btn-primary">Logout</a>
+		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Submission History</th>
+				</tr>
+			</thead>
+		</table>
+		<table class="table">
+			<tbody style="height:20rem;display:inline-block;overflow-y:scroll">
+				<tr style="font-weight:bold;">
+					<td style="padding-right:10rem">Contest</td>
+					<td style="padding-right:6rem">Question Number</td>
+					<td style="padding-right:8rem">Time submitted</td>
+					<td style="padding-right:10rem">Correct/Not Correct</td>
+				</tr>
+				% for sub_history in sub_history :
+				<tr>
+					<td style="padding-right:10rem">{{sub_history["code"]}}</td>
+					<td style="padding-right:6rem">{{sub_history["question"]}}</td>
+					<td style="padding-right:8rem">{{sub_history["time"].strftime("%d-%m-%Y %H:%M")}}</td>
+					<td style="padding-right:10rem">{{sub_history["is_correct"]}}</td>
+				</tr>
+				% end
+			</tbody>
+		</table>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Submission Statistics</th>
+				</tr>
+			</thead>
+		</table>
+		<script>
+			var no_correct = {{sub_stats_correct}};
+			var no_total = {{sub_stats_total}};
+			var no_incorrect = no_total - no_correct;
+		</script>
+		<table class="table">
+			<tbody>
+				<tr>
+					<td style="color:blue;">Total Submissions : {{sub_stats_total}}</td>
+				</tr>
+				<tr>
+					<td id="piechart" style="padding-left:20rem"></td>
+				</tr>
+				<tr>
+			</tbody>
+		</table>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js">
+		</script>
+		
+		<script type="text/javascript">
+		// Load google charts
+		google.charts.load('current', {'packages':['corechart']});
+		google.charts.setOnLoadCallback(drawChart);
+
+		// Draw the chart and set the chart values
+		function drawChart() {
+		  var data = google.visualization.arrayToDataTable([
+		  ['Category', 'Total'],
+		  ['No of Incorrect Questions', no_incorrect],
+		  ['No of Correct Questions', no_correct]
+		]);
+
+		  // Optional; add a title and set the width and height of the chart
+		  var options = {'width':600, 'height':300};
+
+		  // Display the chart inside the <div> element with id="piechart"
+		  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+		  chart.draw(data, options);
+		}
+		</script>
+	</div>
+</body>

@@ -171,6 +171,8 @@ def login_required(function):
     def login_redirect(*args, **kwargs):
         if not logggedIn():
             return bottle.template("home.html", message="Login required.")
+        me = Session.get(Session.token == bottle.request.get_cookie("s_id"))
+        bottle.request.session = me
         return function(*args, **kwargs)
 
     return login_redirect
@@ -202,6 +204,32 @@ def dashboard():
     contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
+
+@app.get("/stats")
+@login_required
+def statistics():
+    sub_history = (
+        Submission.select(
+            Contest.code,
+            ContestProblems.question,
+            Submission.time,
+            Submission.is_correct,
+        )
+        .where(Submission.user == bottle.request.session.user)
+        .join(ContestProblems, on=(Submission.contestProblem == ContestProblems.id))
+        .switch()
+        .join(Contest, on=(ContestProblems.contest == Contest.id))
+        .order_by(Submission.time.desc())
+        .dicts()
+    )
+    sub_stats_total = len(sub_history)
+    sub_stats_correct = len([sub_history for sub in sub_history if sub["is_correct"]])
+    return bottle.template(
+        "stats.html",
+        sub_history=sub_history,
+        sub_stats_correct=sub_stats_correct,
+        sub_stats_total=sub_stats_total,
+    )
 
 
 @app.get("/contest/<code>/<number>")
@@ -346,7 +374,6 @@ def rankings():
         (username, score, rank) for rank, (username, score) in enumerate(order, start=1)
     ]
     return bottle.template("rankings.html", people=order)
-
 
 
 def logggedIn():
