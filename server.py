@@ -12,27 +12,26 @@ question_dir = "files/questions"
 
 db = SqliteDatabase(DATABASE_NAME)
 
-"""
-Class: User 
-      Defines username and password for individual user.
-"""
 class User(Model):
+    """ 
+    Defines username and password for individual user.
+    """
     username = CharField(unique=True)
     password = CharField()
 
     class Meta:
         """
-        Class : Meta
-            define the database in the main class
+        define the database in the main class
         """
         database = db
-        
-"""
-Class: Session
-        Generates randam token for every section
-        new Token is assigned to every User for every new session
-"""  
+
+
 class Session(Model):
+    """
+    Generates randam token for every section
+    new Token is assigned to every User for every new session
+    """ 
+    
     def random_token():
         return "".join([random.choice(string.ascii_letters) for _ in range(20)])
 
@@ -42,14 +41,14 @@ class Session(Model):
     class Meta:
         database = db
 
-"""
-Class: Contest
-        Each Contest instance contains:-
-            Code
-            Description of contest
-            Contest start time and End Time
-"""
+
 class Contest(Model):
+    """
+    Each Contest instance contains:-
+        Code
+        Description of contest
+        Contest start time and End Time
+    """
     code = CharField(unique=True)
     description = CharField()
     start_time = DateTimeField()
@@ -58,26 +57,24 @@ class Contest(Model):
     class Meta:
         database = db
 
-"""
-Class: Question
-        Each Question has a Question no and a author 
-        associated to it
-"""
+
 class Question(Model):
+    """
+    Each Question has a Question no and a author associated to it .
+    """
     q_no = IntegerField(unique=True)
     author = ForeignKeyField(User)
 
     class Meta:
         database = db
 
-"""
-Class: ContestProblems
+
+class ContestProblems(Model):
+    """
     All contest problems belong to a Contest and are itself a question.
         contest defines the instance of Contest Class it belongs
         question defines the questions that belongs to that contest.
-
-"""
-class ContestProblems(Model):
+    """
     contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
 
@@ -85,16 +82,16 @@ class ContestProblems(Model):
         database = db
         indexes = ((("contest", "question"), True),)
 
-"""
-Class: Submission
-    Class defines the submission of solution of a Question
+
+class Submission(Model):
+    """
+    Submoission classdefines the submission of solution of a Question
     Stores the information about:
         User that submits the Solution
         Time of Submission
         Contest to whish The question belongs
         Whether the soolution is correct
-"""
-class Submission(Model):
+    """
     user = ForeignKeyField(User)
     time = DateTimeField()
     contestProblem = ForeignKeyField(ContestProblems)
@@ -160,14 +157,17 @@ ContestProblems.get_or_create(contest=futureContest[0], question=q5[0])
 ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
 
 
-"""
-Function: login_required
-        Extends the functainality of a funcion by checking log in condition.
-        Checks if the user is logged in.if not redirect the user to home page 
-        with message 'Login Required'
-    parameters : Function on which decorator is applied  
-"""
+
 def login_required(function):
+    """
+    Extends the functainality of a funcion by checking log in condition.
+    Checks if the user is logged in.if not redirect the user to home page 
+    with message 'Login Required'
+    
+    : param : Function
+    : type : method
+    """
+    
     def login_redirect(*args, **kwargs):
         if not logggedIn():
             return bottle.template("home.html", message="Login required.")
@@ -176,51 +176,51 @@ def login_required(function):
     return login_redirect
 
 
-"""
-Function: changePath
-    redirects to home page
-"""
+
 @app.route("/")# Sets the url that trigger following function
 def changePath():
+    """ redirects to home page """
     return bottle.redirect("/home")
 
 
-"""
-Function: home
-    redirects to Dashboard of the user
-"""
 @app.get("/home")# Sets the base url as the argument.
 def home():    
+    """
+    If Logged in ,redirects to Dashboard of the user
+    """
     if logggedIn():
         return bottle.redirect("/dashboard")
     return bottle.template("home.html", message="")
 
-"""
-Function: dashboard
-    redirects to Dashboard of the user
-"""
+
 @app.get("/dashboard")# Sets the base url as the argument.
 @login_required# Checks if user is logged in or not
 def dashboard():
+    """
+    Return the dashboard template to the user
+    """
     contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
 
-"""
-Function: question
-        Checks if the question and Contest it belongs does exists.
-        If exists : it checks the current status of the contest
-        And then returns the question state ment along with question numbers
-        and contest code to the Template
-    Parameters:
-        code: Contest Code
-        number: Question Number
-    Return: 
-        Question Template
-"""
+
 @app.get("/contest/<code>/<number>")
 @login_required
 def question(code, number):
+    """
+    Checks if the question and Contest it belongs does exists.
+    If exists : it checks the current status of the contest
+    And then returns the question state ment along with question numbers
+    and contest code to the Template
+
+    : paran code : Contest code 
+    : type code: int
+    : paran Question  : Question no 
+    : type Question: int 
+    : return : Html template for Individual Question  
+
+    """
+    
     if (
         not ContestProblems.select()
         .where((Contest.code == code) & (Question.q_no == int(number)))
@@ -239,18 +239,19 @@ def question(code, number):
     )
 
 
-"""
-Function: contest: Function
-        Checks if contest exists by validating the contest id.
-        Checks the the current staus of code
-    Parameters:
-        code : contest code
-    Return :
-        Contest Template
-"""
+
 @app.get("/contest/<code>")
 @login_required
 def contest(code):
+    """
+    Checks if contest exists by validating the contest id.
+    Checks the the current staus of code
+    
+    : param code : Contest code
+    : return : Html template for Contest 
+    
+    """
+
     try:
         contest = Contest.get(Contest.code == code)
     except Contest.DoesNotExist:
@@ -260,48 +261,45 @@ def contest(code):
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
 
 
-"""
-Function: download 
-        Downloads the question to local system
-    Parameters:
-        path :path to download from
-    Return :
-        Static Files: Downloadable Files
-"""
+
 @app.get("/question/<path:path>")
 def download(path):
+    """
+    Downloads the question to local system
+
+    : param path : path to download from
+    :return : Static Files
+    """
+
     return bottle.static_file(path, root=question_dir)
 
 
-"""
-Function: server_static
-         Static files for server
-    Parameters:
-        path :path of file 
-    Return :
-        Static Files
-"""
+
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
+    """
+    Static files for server
+
+    : param path : path to download from
+    :return : Static Files
+    """ 
     return bottle.static_file(filepath, root=os.path.join(dir_path, "static"))
 
 
-"""
-Function: contest_ranking
-        Generates rankinks of users in a Contest i.e the Contest results
-        Validates the Sumbission And Contest 
-        Checks the number of correct submissions for each user and Added to 
-        list with tuples of Username Along with thier Scores . The tuples 
-        are added to list in descending order of the score .Then rankings are 
-        given to each Username in the list.
-        
-    Parameters:
-        code : contest code
-    Return :
-        Ranking Template with ranks of different user in  a contest.
-"""
 @app.get("/ranking/<code>")
 def contest_ranking(code):
+    """
+    Generates rankinks of users in a Contest i.e the Contest results
+    Validates the Sumbission And Contest. 
+    Checks the number of correct submissions for each user and Added to 
+    list with tuples of Username Along with thier Scores . The tuples 
+    are added to list in descending order of the score .Then rankings are 
+    given to each Username in the list.
+
+
+    :param code : Contest Code
+    :return : Html Template For Displaying Rankings
+    """
     order = (
         Submission.select(
             User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
@@ -323,16 +321,15 @@ def contest_ranking(code):
     return bottle.template("rankings.html", people=order)
 
 
-"""
-Function: rankings 
-        Overall Ranking of the user over all the Contest.
-    Parameters:
-        None
-    Return :
-        Ranking Template with Overall Ranking
-"""
+
 @app.get("/ranking")
 def rankings():
+    """
+    Overall Ranking of the user over all the Contest.
+
+    :param None 
+    :return : Ranking Template with Overall Ranking
+    """
     order = (
         Submission.select(
             User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
@@ -351,17 +348,16 @@ def rankings():
     return bottle.template("rankings.html", people=order)
 
 
-"""
-Function: loggedIn
-        Downloads the question to local system
-    Parameters:
-        None
-    Return :
-        True: if Session exixsts for the user Logged In
-        False: if Session not exixst for the user Logged In
-            or if the s_id is not present or is wrong
-"""
+
 def logggedIn():
+    """
+    Downloads the question to local system
+
+    :param None
+    :return : True if Session exixsts for the user Logged In
+    :return : False if Session not exixst for the user Logged In
+                or if the s_id is not present or is wrong
+    """
     if not bottle.request.get_cookie("s_id"):
         return False
     return (
@@ -371,17 +367,15 @@ def logggedIn():
     )
 
 
-"""
-Function: createSession
-        Create a session for the user
-        Set up cookie for The current session with seesion id ,token and expiry 
-        time
-    Parameters:
-        username: Username of user For whom session is Created.
-    Return :
-        Redirects to user Dashoard
-"""
+
 def createSession(username):
+    """
+    Create a session for the user.
+    Set up cookie for The current session with seesion id ,token and expiry time.
+
+    :param username: Username for which session is created
+    :return : Resicts to dashboard of user
+    """
     try:
         session = Session.create(user=User.get(User.username == username))
     except IntegrityError:
@@ -394,18 +388,16 @@ def createSession(username):
     return bottle.redirect("/dashboard")
 
 
-"""
-Function: login
-        This function is called whenever user log in to the app
-        Checks if the user entered the Right credentials for log in
-    Parameters:
-        None
-    Return :
-        Redirects to home if invalid credenial
-        Else Creates the session for the user  
-"""
 @app.post("/login")
 def login():
+    """
+    This function is called whenever user log in to the app
+    Checks if the user entered the Right credentials for log in
+
+    :param None:
+    :return : Redirects to home if invalid credenial Else Creates the session for the user  
+    """
+    
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
     if (
@@ -417,18 +409,17 @@ def login():
     return createSession(username)
 
 
-"""
-Function: resgiter 
-        This function is called whenever new user registers
-        New User is Created in the Data base and his credentials are stored
-        Checks if the user with same username already exisxts
-    Parameters:
-        None
-    Return :
-        Creates session for new user.
-"""
+
 @app.post("/register")
 def register():
+    """
+    This function is called whenever new user registers
+    New User is Created in the Data base and his credentials are stored
+    Checks if the user with same username already exisxts
+
+    :param None:
+    :return : Create session function called for new username.
+    """
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
     try:
@@ -440,36 +431,33 @@ def register():
     return createSession(username)
 
 
-"""
-Function: logout
-        Ends the session for the user 
-        Deletes the session cookie
-        
-    Parameters:
-        None
-    Return :
-        Redirects to Home Page
-"""
+
 @app.get("/logout")
 def logout():
+    """
+    Ends the session for the user  on logout
+    Deletes the session cookie
+
+    : param None:
+    :return : Redirects to Home Page
+    """
     Session.delete().where(Session.token == bottle.request.get_cookie("s_id")).execute()
     bottle.response.delete_cookie("s_id")
     return bottle.redirect("/home")
 
 
-"""
-Function: file_upload 
-       This Function is used to upload the submission to  Question to the Server.
-    Parameters:
-        code: Contest Code 
-        number : Question No of ehich solution is uploaded
-    Return :
-        "Wrong Answer!! : If solution is wrong
-        "Solved! Great Job! " : If solution is correct    
-"""
+
 @app.post("/check/<code>/<number>")
 @login_required 
 def file_upload(code, number):
+    """
+    This Function is used to upload the submission to  Question to the Server.
+
+    :param code: Contest Code 
+    :param number : Question No of which solution is uploaded
+    :return : "Wrong Answer!! : If solution is wrong
+    :return : "Solved! Great Job! " : If solution is correct    
+    """
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
@@ -499,17 +487,15 @@ def file_upload(code, number):
         return "Solved! Great Job! "
 
 
-"""
-Function: error404 
-        Handles Error  
-    Parameter:
-        error : Error rturned the App
-    Return :
-        Redirects to 
-        
-"""
+
 @app.error(404) # Checks if app returns an error with error code as argument
 def error404(error):
+    """
+    Handles Error 
+
+    :param error : Error rturned the App
+    :return : Redirects to Template which Display Error
+    """
     return template("error.html", errorcode=error.status_code, errorbody=error.body)
 
 
