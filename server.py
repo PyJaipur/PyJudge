@@ -352,4 +352,5 @@ def error404(error):
     return template("error.html", errorcode=error.status_code, errorbody=error.body)
 
 
-bottle.run(app, host="localhost", port=8080)
+if __name__ == "__main__":
+    bottle.run(app, host="localhost", port=8080)

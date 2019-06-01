@@ -13,6 +13,7 @@ peewee = "*"
 [dev-packages]
 requests = "*"
 pytest = "*"
+webtest = "*"
 
 [requires]
 python_version = "3.6"
