@@ -108,48 +108,6 @@ def dashboard():
     contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
-@app.get("/stats")
-@login_required
-def statistics():
-    with shelve.open(database_path) as submission_record:
-        sub_history = [
-            (
-                user,
-                [
-                    attempt
-                    for attempt in submissions
-                ]
-            )
-            for user, submissions in submission_record.items()
-        ]
-        sub_stats = [
-            (
-                user,
-                len(
-                        [
-                            attempt.question
-                            for attempt in submissions
-                            if not(attempt.is_correct)
-                        ]
-                ),
-				len(
-                        [
-                            attempt.question
-                            for attempt in submissions
-                            if attempt.is_correct
-                        ]
-                ),
-				len(
-                        [
-                            attempt.question
-                            for attempt in submissions
-                        ]
-                )
-            )
-            for user, submissions in submission_record.items()
-        ]
-    return bottle.template("stats.html", sub_history=sub_history, sub_stats=sub_stats)
-
 
 @app.get("/stats")
 @login_required
