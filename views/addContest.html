@@ -1,0 +1,58 @@
+% include('base.html', title="Add Contest")
+<body>
+   <header class="text-center">
+      <h1>Contest Creation Page</h1>
+   </header>
+   <div class="container">
+      </br>
+      </br>
+      <form action="/contestInput" method = "post" enctype = "multipart/form-data">
+         Contest Code : <br/>
+         <input type="text" name="code" required /><br/><br/>
+         Contest Description : <br/>
+         <textarea name="description" rows = "3" cols = "80" required>Enter Description</textarea>
+         <br/><br/>
+         Start Time : <br/>
+         <input name="start_time" type='date'/><br/><br/>
+         End Time : <br/>
+         <input name="end_time" type='date'/>
+         <br/>
+         <br/>
+   </div>
+   <div class="container text-center">
+	   <table class="table">
+		   <thead>
+			   <tr>
+					<th class="d-flex justify-content-center justify-content-center">List Of Questions</th>
+			   </tr>
+		   </thead>
+	   </table>
+	   <table class="table">
+		   <tbody style="height:20rem;display:inline-block;overflow-y:scroll">
+			   <tr style="font-weight:bold;">
+				   <td style="padding-right:10rem">Question</td>
+				   <td style="padding-right:6rem">Question Statement</td>
+				   <td style="padding-right:10rem">Author</td>
+				   <td style="padding-right:8rem">Time submitted</td>
+				   <td style="padding-right:8rem">Selection</td>
+			   </tr>
+				   % for question in question_bank :
+			   <tr>
+				   <td style="padding-right:10rem">
+					   <a href="/question/{{question['id']}}" role="button" class="btn btn-primary">
+					   Download Question
+					   </a>	
+				   </td>
+				   <td name="statement" style="padding-right:10rem">{{question["question_statement"]}}</td>
+				   <td style="padding-right:10rem">{{question["username"]}}</td>
+				   <td style="padding-right:8rem">{{question["created_date_time"].strftime("%d-%m-%Y %H:%M")}}</td>
+				   <td style="padding-right:8rem"><input type="checkbox" name="selection" value="{{question['id']}}"></td>
+			   </tr>
+				   % end
+		   </tbody>
+	   </table>
+		<button class="btn btn-primary" type="submit">Upload</button>
+	   </form>
+   </div>	
+</body>
+
