@@ -1,0 +1,38 @@
+% include('base.html', title="Question Bank")
+<body>
+	<div class="container text-center">
+		<div class="container" style="height:3rem;">
+			<a href="/dashboard" class="btn btn-primary">Dashboard</a>
+			<a href="/logout" class="btn btn-primary">Logout</a>
+		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					</br></br><th class="text-center">List Of Questions</th>
+				</tr>
+			</thead>
+		</table>
+		<table class="table">
+			<tbody style="height:20rem;display:inline-block;overflow-y:scroll">
+				<tr style="font-weight:bold;">
+					<td style="padding-right:10rem">Question</td>
+					<td style="padding-right:6rem"> Question Statement</td>
+					<td style="padding-right:10rem">Author</td>
+					<td style="padding-right:8rem">Time submitted</td>
+				</tr>
+				% for question in question_bank :
+				<tr>
+					<td style="padding-right:10rem">
+						<a href="/question/{{question['id']}}" role="button" class="btn btn-primary">
+						Download Question
+						</a>	
+					</td>
+					<td style="padding-right:10rem">{{question["question_statement"]}}</td>
+					<td style="padding-right:10rem">{{question["username"]}}</td>
+					<td style="padding-right:8rem">{{question["created_date_time"].strftime("%d-%m-%Y %H:%M")}}</td>
+				</tr>
+				% end
+			</tbody>
+		</table>
+	</div>
+</body>
