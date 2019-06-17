@@ -1,0 +1,20 @@
+% include('base.html', title="Add Question")
+<body>
+	<header class="text-center">
+		<h1>Question Upload Page</h1>
+	</header>
+	<div class="container">
+				</br>
+				</br>
+				<form action="/questionInput" method = "post" enctype = "multipart/form-data">Question Upload : <br/>
+				<input type="file" name="question" required /><br/><br/>
+				Answer Upload : <br/>
+				<input type="file" name="answer" required /><br/><br/>
+				Statement : <br/>
+				<textarea name="statement" rows = "3" cols = "80" required>Enter Statement</textarea>
+				<br/>
+				<br/>
+				<button class="btn btn-primary" type="submit">Upload</button>
+				</form>
+	</div>
+</body>
