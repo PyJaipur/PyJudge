@@ -55,6 +55,15 @@ class Question(Model):
         database = db
 
 
+class QuestionStatus(Model):
+    question = ForeignKeyField(Question)
+    user = TextField()
+    status = TextField()
+
+    class Meta:
+        database = db
+
+
 class ContestProblems(Model):
     contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
@@ -76,7 +85,7 @@ class Submission(Model):
 
 
 db.connect()
-db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
+db.create_tables([User, Session, Submission, ContestProblems, Contest, Question, QuestionStatus])
 
 
 def login_required(function):
@@ -236,9 +245,16 @@ def question(code, number):
         .dicts()
         .get()
     )
-    return bottle.template(
-        "question.html", question_number=number, contest=code, question=statement
-    )
+    user = Session.get(Session.token == bottle.request.get_cookie("s_id")).user
+    question_status = QuestionStatus.select().where((QuestionStatus.question == number) & (QuestionStatus.user == user))
+    if question_status.count() == 0:
+        return bottle.template(
+            "question.html", question_number=number, contest=code, question=statement, question_status='Not Submitted'
+        )
+    else:
+        return bottle.template(
+            "question.html", question_number=number, contest=code, question=statement, question_status='Submitted'
+        )
 
 
 @app.get("/contest/<code>")
@@ -396,6 +412,12 @@ def file_upload(code, number):
     try:
         Submission.create(
             user=user, contestProblem=contestProblem, time=time, is_correct=ans
+        )
+    except Exception as e:
+        bottle.abort(500, str(e))
+    try:
+        QuestionStatus.get_or_create(
+            question=number, user=user, status='Attempted'
         )
     except Exception as e:
         bottle.abort(500, str(e))
