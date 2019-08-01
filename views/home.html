@@ -5,7 +5,7 @@
             PyJudge
         </h1>
     </div>
-    % if message:
+    % if message: 
     <div class="alert alert-success alert-dismissible" style='width:auto;'>
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     <strong>Error!</strong> {{message}}
@@ -20,25 +20,30 @@
                 <a class="nav-link" data-toggle="tab" href="#register">Register</a>
             </li>
         </ul>
-        <div class="tab-content">
-            <div id="login" class="tab-pane container active">
+        <div class="tab-content col-lg-4 col-md-6">
+            <div id="login" class="tab-pane active">
                 <form name="login" method="post" action="/login">
                     <label>Username:</label>
-                    <input type="text" name="username" required /><br />
+                    <input type="text" name="username" class="form-control"  required />
+                
                     <label>Password</label>
-                    <input type="password" name="password" required /><br />
+                    <input type="password" name="password" class="form-control"  required />
+                    <br>
                     <input class="btn btn-primary" type="submit" value="Login" />
+                
                 </form>
             </div>
-            <div id="register" class="tab-pane container fade">
+            <div id="register" class="tab-pane fade">
                 <form name="register" method="post" action="/register">
                     <label>Username:</label>
-                    <input type="text" name="username" required /><br />
+                    <input type="text" name="username" class="form-control" required />
                     <label>Password:</label>
-                    <input type="password" name="password" required /><br />
+                    <input type="password" name="password" class="form-control" required />
+                    <br>
                     <input class="btn btn-primary" type="submit" value="Register" />
                 </form>
             </div>
-        </div>
+        </div> 
     </div>
+    
 </body>
