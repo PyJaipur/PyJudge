@@ -12,7 +12,6 @@ question_dir = "files/questions"
 
 db = SqliteDatabase(DATABASE_NAME)
 
-
 class User(Model):
     username = CharField(unique=True)
     password = CharField()
@@ -22,6 +21,11 @@ class User(Model):
 
 
 class Session(Model):
+    """
+    For every new user ,random token is generated,so that the 
+    token is unique for every user
+    """ 
+
     def random_token():
         return "".join([random.choice(string.ascii_letters) for _ in range(20)])
 
@@ -45,9 +49,14 @@ class Contest(Model):
 
 
 class Question(Model):
+<<<<<<< HEAD
+    q_no = IntegerField(unique=True)
+=======
+    
     test_case_input = TextField()
     test_case_output = TextField()
     question_statement = CharField()
+>>>>>>> main3
     author = ForeignKeyField(User)
     created_date_time = DateTimeField(default=datetime.datetime.now)
 
@@ -56,6 +65,11 @@ class Question(Model):
 
 
 class ContestProblems(Model):
+    """
+    All contest problems belong to a Contest and are itself a question.
+        contest defines the instance of Contest Class it belongs
+        question defines the questions that belongs to that contest.
+    """
     contest = ForeignKeyField(Contest, backref="questions")
     question = ForeignKeyField(Question)
 
@@ -65,6 +79,14 @@ class ContestProblems(Model):
 
 
 class Submission(Model):
+    """
+    Submoission classdefines the submission of solution of a Question
+    Stores the information about:
+        User that submits the Solution
+        Time of Submission
+        Contest to whish The question belongs
+        Whether the soolution is correct
+    """
     user = ForeignKeyField(User)
     time = DateTimeField()
     contestProblem = ForeignKeyField(ContestProblems)
@@ -72,12 +94,64 @@ class Submission(Model):
 
     class Meta:
         database = db
+        #define the database in the main class
         indexes = ((("user", "time"), True),)
 
-
+#Establish a Connection with Database
 db.connect()
+
+"""Create Tables with specied fields in Databse"""
 db.create_tables([User, Session, Submission, ContestProblems, Contest, Question])
 
+<<<<<<< HEAD
+# dummy contest data
+practiceContest = Contest.get_or_create(
+    code="PRACTICE",
+    description="practice questions",
+    start_time=datetime.datetime(day=1, month=1, year=1),
+    end_time=datetime.datetime(day=1, month=1, year=9999),
+)
+pastContest = Contest.get_or_create(
+    code="PASTCONTEST",
+    description="somewhere in the past",
+    start_time=datetime.datetime(day=1, month=11, year=2018),
+    end_time=datetime.datetime(day=1, month=12, year=2018),
+)
+ongoingContest = Contest.get_or_create(
+    code="ONGOINGCONTEST",
+    description="somewhere in the present",
+    start_time=datetime.datetime(day=1, month=4, year=2019),
+    end_time=datetime.datetime(day=1, month=6, year=2019),
+)
+futureContest = Contest.get_or_create(
+    code="FUTURECONTEST",
+    description="somewhere in the future",
+    start_time=datetime.datetime(day=1, month=1, year=2020),
+    end_time=datetime.datetime(day=1, month=10, year=2020),
+)
+
+test = User.get_or_create(username="test", password="test")
+
+q1 = Question.get_or_create(q_no=1, author=test[0])
+q2 = Question.get_or_create(q_no=2, author=test[0])
+q3 = Question.get_or_create(q_no=3, author=test[0])
+q4 = Question.get_or_create(q_no=4, author=test[0])
+q5 = Question.get_or_create(q_no=5, author=test[0])
+q6 = Question.get_or_create(q_no=6, author=test[0])
+
+
+ContestProblems.get_or_create(contest=practiceContest[0], question=q1[0])
+ContestProblems.get_or_create(contest=practiceContest[0], question=q2[0])
+ContestProblems.get_or_create(contest=pastContest[0], question=q1[0])
+ContestProblems.get_or_create(contest=pastContest[0], question=q2[0])
+ContestProblems.get_or_create(contest=ongoingContest[0], question=q3[0])
+ContestProblems.get_or_create(contest=ongoingContest[0], question=q4[0])
+ContestProblems.get_or_create(contest=futureContest[0], question=q5[0])
+ContestProblems.get_or_create(contest=futureContest[0], question=q6[0])
+
+
+=======
+>>>>>>> main3
 
 def login_required(function):
     def login_redirect(*args, **kwargs):
@@ -88,6 +162,7 @@ def login_required(function):
         return function(*args, **kwargs)
 
     return login_redirect
+
 
 
 @app.route("/")
@@ -105,6 +180,9 @@ def home():
 @app.get("/dashboard")
 @login_required
 def dashboard():
+    """
+    Return the dashboard template to the user
+    """
     contests = Contest.select().order_by(Contest.start_time)
     return bottle.template("dashboard.html", contests=contests)
 
@@ -219,6 +297,20 @@ def contestInput():
 @app.get("/contest/<code>/<number>")
 @login_required
 def question(code, number):
+    """
+    Checks if the question and Contest it belongs does exists.
+    If exists : it checks the current status of the contest
+    And then returns the question state ment along with question numbers
+    and contest code to the Template
+
+    : paran code : Contest code 
+    : type code: int
+    : paran Question  : Question no 
+    : type Question: int 
+    : return : Html template for Individual Question  
+
+    """
+    
     if (
         not ContestProblems.select()
         .where((Contest.code == code) & (Question.id == int(number)))
@@ -241,9 +333,19 @@ def question(code, number):
     )
 
 
+
 @app.get("/contest/<code>")
 @login_required
 def contest(code):
+    """
+    Checks if contest exists by validating the contest id.
+    Checks the the current staus of code
+    
+    : param code : Contest code
+    : return : Html template for Contest 
+    
+    """
+
     try:
         contest = Contest.get(Contest.code == code)
     except Contest.DoesNotExist:
@@ -251,6 +353,7 @@ def contest(code):
     if contest.start_time > datetime.datetime.now():
         return "The contest had not started yet."
     return bottle.template("contest.html", contest=contest, questions=contest.questions)
+
 
 
 @app.get("/question/<id>")
@@ -267,13 +370,32 @@ def download(id):
     return question_result["test_case_input"]
 
 
+
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
+    """
+    Static files for server
+
+    : param path : path to download from
+    :return : Static Files
+    """ 
     return bottle.static_file(filepath, root=os.path.join(dir_path, "static"))
 
 
 @app.get("/ranking/<code>")
 def contest_ranking(code):
+    """
+    Generates rankinks of users in a Contest i.e the Contest results
+    Validates the Sumbission And Contest. 
+    Checks the number of correct submissions for each user and Added to 
+    list with tuples of Username Along with thier Scores . The tuples 
+    are added to list in descending order of the score .Then rankings are 
+    given to each Username in the list.
+
+
+    :param code : Contest Code
+    :return : Html Template For Displaying Rankings
+    """
     order = (
         Submission.select(
             User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
@@ -295,8 +417,15 @@ def contest_ranking(code):
     return bottle.template("rankings.html", people=order)
 
 
+
 @app.get("/ranking")
 def rankings():
+    """
+    Overall Ranking of the user over all the Contest.
+
+    :param None 
+    :return : Ranking Template with Overall Ranking
+    """
     order = (
         Submission.select(
             User.username, fn.count(Submission.contestProblem.distinct()).alias("score")
@@ -316,6 +445,7 @@ def rankings():
 
 
 def logggedIn():
+
     if not bottle.request.get_cookie("s_id"):
         return False
     return (
@@ -325,7 +455,9 @@ def logggedIn():
     )
 
 
+
 def createSession(username):
+    
     try:
         session = Session.create(user=User.get(User.username == username))
     except IntegrityError:
@@ -340,6 +472,7 @@ def createSession(username):
 
 @app.post("/login")
 def login():
+    
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
     if (
@@ -351,8 +484,10 @@ def login():
     return createSession(username)
 
 
+
 @app.post("/register")
 def register():
+
     username = bottle.request.forms.get("username")
     password = bottle.request.forms.get("password")
     try:
@@ -364,16 +499,20 @@ def register():
     return createSession(username)
 
 
+
 @app.get("/logout")
 def logout():
+
     Session.delete().where(Session.token == bottle.request.get_cookie("s_id")).execute()
     bottle.response.delete_cookie("s_id")
     return bottle.redirect("/home")
 
 
+
 @app.post("/check/<code>/<number>")
-@login_required
+@login_required 
 def file_upload(code, number):
+
     try:
         contestProblem = ContestProblems.get(
             ContestProblems.contest == Contest.get(Contest.code == code),
@@ -393,20 +532,44 @@ def file_upload(code, number):
     expected = expected["test_case_output"]
     uploaded = uploaded.strip()
     ans = uploaded == expected
+    
     try:
         Submission.create(
             user=user, contestProblem=contestProblem, time=time, is_correct=ans
+<<<<<<< HEAD
+        )
+    except:
+        bottle.abort(500, "Error in inserting submission to database.")
+    
+    if not ans:
+=======
+<<<<<<< HEAD
+        )# Add Submission For User
+    except:
+        bottle.abort(500, "Error in inserting submission to database.")
+    
+    if not ans: # if Answer is Wrong
+=======
         )
     except Exception as e:
         bottle.abort(500, str(e))
     if not ans:
+>>>>>>> 67730ed88a8c14fc1e4381f0bde6ee55f81aef12
+>>>>>>> main3
         return "Wrong Answer!!"
     else:
         return "Solved! Great Job! "
 
 
+
 @app.error(404)
 def error404(error):
+    """
+    Handles Error 
+
+    :param error : Error returned the App
+    :return : Redirects to Template which Display Error
+    """
     return template("error.html", errorcode=error.status_code, errorbody=error.body)
 
 
