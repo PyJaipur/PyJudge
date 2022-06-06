@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 bottle = "*"
-pip = "==18.0"
+pip = "==21.1"
 pre-commit = "*"
 black = "*"
 peewee = "*"
